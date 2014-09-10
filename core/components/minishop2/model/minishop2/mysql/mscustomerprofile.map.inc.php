@@ -8,6 +8,7 @@ $xpdo_meta_map['msCustomerProfile']= array (
   array (
     'id' => NULL,
     'account' => 0,
+    'spent' => 0,
     'createdon' => 'CURRENT_TIMESTAMP',
     'referrer_id' => 0,
     'referrer_code' => '',
@@ -24,6 +25,14 @@ $xpdo_meta_map['msCustomerProfile']= array (
       'index' => 'pk',
     ),
     'account' => 
+    array (
+      'dbtype' => 'decimal',
+      'precision' => '12,2',
+      'phptype' => 'float',
+      'null' => true,
+      'default' => 0,
+    ),
+    'spent' => 
     array (
       'dbtype' => 'decimal',
       'precision' => '12,2',
@@ -108,13 +117,29 @@ $xpdo_meta_map['msCustomerProfile']= array (
         ),
       ),
     ),
+    'spent' => 
+    array (
+      'alias' => 'spent',
+      'primary' => false,
+      'unique' => false,
+      'type' => 'BTREE',
+      'columns' => 
+      array (
+        'spent' => 
+        array (
+          'length' => '',
+          'collation' => 'A',
+          'null' => false,
+        ),
+      ),
+    ),
   ),
   'aggregates' => 
   array (
     'User' => 
     array (
       'class' => 'modUser',
-      'local' => 'internalKey',
+      'local' => 'id',
       'foreign' => 'id',
       'owner' => 'foreign',
       'cardinality' => 'one',

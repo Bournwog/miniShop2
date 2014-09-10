@@ -20,12 +20,21 @@ $_lang['setting_ms2_product_main_fields_desc'] = 'Comma separated list of fields
 $_lang['setting_ms2_product_extra_fields'] = 'Extra fields of the panel of the product';
 $_lang['setting_ms2_product_extra_fields_desc'] = 'Comma separated list of fields in the panel of the product, that needed in your shop. For example: "price,old_price,weight".';
 
+$_lang['setting_ms2_product_tab_extra'] = 'Product properties tab';
+$_lang['setting_ms2_product_tab_extra_desc'] = 'Display tab with product properties?';
+$_lang['setting_ms2_product_tab_gallery'] = 'Product gallery tab';
+$_lang['setting_ms2_product_tab_gallery_desc'] = 'Display tab with product gallery?';
+$_lang['setting_ms2_product_tab_links'] = 'Product links tab';
+$_lang['setting_ms2_product_tab_links_desc'] = 'Display tab with product links?';
+
 $_lang['setting_ms2_category_show_comments'] = 'Display comments of the category';
 $_lang['setting_ms2_category_show_comments_desc'] = 'Display comments of all goods from category if component "Tickets" is installed.';
 $_lang['setting_ms2_category_show_nested_products'] = 'Show nested product of category';
 $_lang['setting_ms2_category_show_nested_products_desc'] = 'If set to true, you will see all nested products of category. They will have another color and name of their category below pagetitle.';
 $_lang['setting_ms2_category_remember_tabs'] = 'Remember category active tab';
 $_lang['setting_ms2_category_remember_tabs_desc'] = 'If true, active tab of category panel will be remembered and restored on reload page.';
+$_lang['setting_ms2_category_remember_grid'] = 'Remembering the categories table';
+$_lang['setting_ms2_category_remember_grid_desc'] = 'When enabled, the state of the table categories will be remembered and restored when loading the page, including the page number, and the search string.';
 $_lang['setting_ms2_category_id_as_alias'] = 'Use id of category as alias';
 $_lang['setting_ms2_category_id_as_alias_desc'] = 'If true, aliases for friendly urls of categories will don be generated. Id will be set as alias.';
 $_lang['setting_ms2_category_content_default'] = 'Default content of category';

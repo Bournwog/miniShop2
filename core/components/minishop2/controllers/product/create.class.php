@@ -43,7 +43,6 @@ class msProductCreateManagerController extends ResourceCreateManagerController {
 		$minishopAssetsUrl = $this->modx->getOption('minishop2.assets_url',null,$this->modx->getOption('assets_url',null,MODX_ASSETS_URL).'components/minishop2/');
 		$connectorUrl = $minishopAssetsUrl.'connector.php';
 		$minishopJsUrl = $minishopAssetsUrl.'js/mgr/';
-		$minishopCssUrl = $minishopAssetsUrl.'css/mgr/';
 		$minishopImgUrl = $minishopAssetsUrl.'img/mgr/';
 
 		// Customizable product fields feature
@@ -63,7 +62,6 @@ class msProductCreateManagerController extends ResourceCreateManagerController {
 		$product_extra_fields = array_values(array_intersect($product_extra_fields, $product_fields));
 		//---
 
-		$this->addCss($minishopCssUrl. 'bootstrap.min.css');
 		$this->addJavascript($mgrUrl.'assets/modext/util/datetime.js');
 		$this->addJavascript($mgrUrl.'assets/modext/widgets/element/modx.panel.tv.renders.js');
 		$this->addJavascript($mgrUrl.'assets/modext/widgets/resource/modx.grid.resource.security.local.js');
@@ -93,6 +91,9 @@ class msProductCreateManagerController extends ResourceCreateManagerController {
 			,main_fields: '.json_encode($product_main_fields).'
 			,extra_fields: '.json_encode($product_extra_fields).'
 			,vertical_tabs: '.$this->modx->getOption('ms2_product_vertical_tabs', null, true).'
+			,product_tab_extra: '.$this->modx->getOption('ms2_product_tab_extra', null, true).'
+			,product_tab_gallery: '.$this->modx->getOption('ms2_product_tab_gallery', null, true).'
+			,product_tab_links: '.$this->modx->getOption('ms2_product_tab_links', null, true).'
 			,data_fields: '.json_encode($product_data_fields).'
 			,additional_fields: []
 		}

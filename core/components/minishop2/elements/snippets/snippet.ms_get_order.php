@@ -14,19 +14,26 @@ if ((empty($_SESSION['minishop2']['orders']) || !in_array($id, $_SESSION['minish
 	return !empty($tplEmpty) ? $pdoFetch->getChunk($tplEmpty) : '';
 }
 
-$pls_order = $order->toArray();
-$pls_user = $order->getOne('User')->getOne('Profile')->toArray('user.');
-$pls_address = $order->getOne('Address')->toArray('address.');
-$pls_delivery = $order->getOne('Delivery')->toArray('delivery.');
-$pls_payment = $order->getOne('Payment')->toArray('payment.');
-$outer = array_merge($pls_order, $pls_user, $pls_address, $pls_delivery, $pls_payment);
+$user = $order->getOne('User');
+if ($user) {
+	$user = $user->getOne('Profile');
+}
+$address = $order->getOne('Address');
+$delivery = $order->getOne('Delivery');
+$payment = $order->getOne('Payment');
+$outer = array_merge($order->toArray(), array(
+	'user' => $user ? $user->toArray() : array(),
+	'address' => $address ? $address->toArray() : array(),
+	'delivery' => $delivery ? $delivery->toArray() : array(),
+	'payment' => $payment ? $payment->toArray() : array(),
+));
 
 $outer['goods'] = '';
 $outer['cart_count'] = 0;
 $outer['cost'] = $miniShop2->formatPrice($outer['cost']);
 $outer['cart_cost'] = $miniShop2->formatPrice($outer['cart_cost']);
 $outer['delivery_cost'] = $miniShop2->formatPrice($outer['delivery_cost']);
-$outer['weight'] = $miniShop2->formatWeight($outer['weight']);
+$outer['weight'] = $outer['cart_weight'] = $miniShop2->formatWeight($outer['weight']);
 
 // Include Thumbnails
 $thumbsLeftJoin = '';
@@ -45,7 +52,7 @@ if (!empty($includeThumbs)) {
 
 // Fields to select
 $resourceColumns = !empty($includeContent) ?  $modx->getSelectColumns('msProduct', 'msProduct') : $modx->getSelectColumns('msProduct', 'msProduct', '', array('content'), true);
-$dataColumns = $modx->getSelectColumns('msProductData', 'Data', '', array('id'), true);
+$dataColumns = $modx->getSelectColumns('msProductData', 'Data', '', array('id'), true) . ',`Data`.`price` as `original_price`';
 $vendorColumns = $modx->getSelectColumns('msVendor', 'Vendor', 'vendor.', array('id'), true);
 $orderProductColumns = $modx->getSelectColumns('msOrderProduct', 'msOrderProduct', '', array('id'), true);
 
@@ -73,16 +80,33 @@ $scriptProperties['tpl'] = $scriptProperties['tplRow'];
 $pdoFetch->setConfig(array_merge($default, $scriptProperties));
 $rows = $pdoFetch->run();
 
-/* @var msOrderProduct $row */
+/** @var msOrderProduct $row */
 foreach ($rows as $row) {
 	$outer['cart_count'] += $row['count'];
+	$row['old_price'] = $miniShop2->formatPrice(
+		$row['original_price'] != $row['price']
+			? $row['original_price']
+			: $row['old_price']
+	);
 	$row['price'] = $miniShop2->formatPrice($row['price']);
-	$row['old_price'] = $miniShop2->formatPrice($row['old_price']);
 	$row['cost'] = $miniShop2->formatPrice($row['cost']);
 	$row['weight'] = $miniShop2->formatWeight($row['weight']);
 
+	$row['id'] = (integer) $row['id'];
+	if (empty($row['name'])) {
+		$row['name'] = $row['pagetitle'];
+	}
+	else {
+		$row['pagetitle'] = $row['name'];
+	}
+	$row['link'] = !empty($row['id'])
+		? $row['link'] = $modx->makeUrl($row['id'], '', '', 'full')
+		: '';
+
 	// Additional properties of product
-	$options = json_decode($row['options'],1);
+	$options = !is_array($row['options'])
+		? $modx->fromJSON($row['options'])
+		: $row['options'];
 	if (!empty($options) && is_array($options)) {
 		foreach ($options as $key => $value) {
 			$row['option.'.$key] = $value;
@@ -97,7 +121,7 @@ foreach ($rows as $row) {
 }
 
 if (empty($tplOuter)) {
-	$modx->setPlaceholders($outer);
+	$modx->toPlaceholders($outer);
 }
 else {
 	return $pdoFetch->getChunk($tplOuter, $outer);

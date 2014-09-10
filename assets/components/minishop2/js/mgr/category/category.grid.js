@@ -1,15 +1,19 @@
 miniShop2.grid.Category = function(config) {
 	config = config || {};
 
-	var params = Ext.util.Cookies.get('minishop2-category-grid-' + config.resource);
-	params = Ext.util.JSON.decode(params);
 	var baseParams = {
 		action: 'mgr/product/getlist'
 		,parent: config.resource
 	};
-	if (params.query) {baseParams.query = params.query;}
-	if (params.sort) {baseParams.sort = params.sort;}
-	if (params.dir) {baseParams.dir = params.dir;}
+	var params = {};
+	if (MODx.config.ms2_category_remember_grid) {
+		params = Ext.util.JSON.decode(
+			Ext.util.Cookies.get('minishop2-category-grid-' + config.resource)
+		);
+		if (params.query) {baseParams.query = params.query;}
+		if (params.sort) {baseParams.sort = params.sort;}
+		if (params.dir) {baseParams.dir = params.dir;}
+	}
 
 	this.sm = new Ext.grid.CheckboxSelectionModel();
 	Ext.applyIf(config,{
@@ -33,7 +37,7 @@ miniShop2.grid.Category = function(config) {
 		,stateId: 'minishop2-category-grid'
 		,stateEvents: ['columnresize']
 		,tbar: [{
-			text: '<i class="bicon-list"></i> ' + _('ms2_bulk_actions')
+			text: '<i class="'+ (MODx.modx23 ? 'icon icon-list' : 'bicon-list') + '"></i> ' + _('ms2_bulk_actions')
 			,menu: [
 				{text: _('ms2_product_selected_publish'),handler: this.publishSelected,scope: this}
 				,{text: _('ms2_product_selected_unpublish'),handler: this.unpublishSelected,scope: this}
@@ -42,7 +46,7 @@ miniShop2.grid.Category = function(config) {
 				,{text: _('ms2_product_selected_undelete'),handler: this.undeleteSelected,scope: this}
 			]
 		},'-',{
-			text: '<i class="bicon-plus-sign"></i> ' + _('ms2_product_create')
+			text: '<i class="'+ (MODx.modx23 ? 'icon icon-plus' : 'bicon-plus-sign') + '"></i> ' + _('ms2_product_create')
 			,handler: this.createProduct
 			,scope: this
 		},'->',{
@@ -58,7 +62,7 @@ miniShop2.grid.Category = function(config) {
 		},{
 			xtype: 'button'
 			,id: 'minishop2-product-clear'
-			,text: '<i class="bicon-remove-sign"></i>' // + _('ms2_search_clear')
+			,text: '<i class="'+ (MODx.modx23 ? 'icon icon-times' : 'bicon-remove-sign') + '"></i>' // + _('ms2_search_clear')
 			,listeners: {
 				click: {fn: this.clearFilter, scope: this}
 			}
@@ -72,10 +76,12 @@ miniShop2.grid.Category = function(config) {
 	miniShop2.grid.Category.superclass.constructor.call(this,config);
 	this._makeTemplates();
 
-	this.getStore().on('load', function(grid, records, options) {
-		var params = Ext.util.JSON.encode(options.params);
-		Ext.util.Cookies.set('minishop2-category-grid-' + config.resource, params);
-	});
+	if (MODx.config.ms2_category_remember_grid) {
+		this.getStore().on('load', function(grid, records, options) {
+			var params = Ext.util.JSON.encode(options.params);
+			Ext.util.Cookies.set('minishop2-category-grid-' + config.resource, params);
+		});
+	}
 };
 Ext.extend(miniShop2.grid.Category,MODx.grid.Grid,{
 
@@ -132,8 +138,7 @@ Ext.extend(miniShop2.grid.Category,MODx.grid.Grid,{
 		var elm = t.className.split(' ')[0];
 		if(elm == 'controlBtn') {
 			var action = t.className.split(' ')[1];
-			var record = this.getSelectionModel().getSelected();
-			this.menu.record = record;
+			this.menu.record = this.getSelectionModel().getSelected();
 			switch (action) {
 				case 'delete':
 					this.deleteProduct();
@@ -153,11 +158,9 @@ Ext.extend(miniShop2.grid.Category,MODx.grid.Grid,{
 				case 'view':
 					this.viewProduct();
 					break;
-				default:
-					window.location = record.data.edit_action;
-					break;
 			}
 		}
+		this.processEvent('click', e);
 	}
 
 	,search: function(tf, nv, ov) {

@@ -18,8 +18,9 @@ if (!empty($_GET['msorder'])) {
 }
 
 $cart = $miniShop2->cart->get();
+$status = $miniShop2->cart->status();
 $order = $miniShop2->order->get();
-if (empty($cart)) {
+if (empty($status['total_count'])) {
 	return !empty($tplEmpty) ? $pdoFetch->getChunk($tplEmpty) : '';
 }
 
@@ -81,15 +82,13 @@ if (!empty($deliveries)) {
 
 		$pdoFetch->addTime('Processing delivery '.$delivery['name'].'.');
 		$delivery['checked'] = !empty($order['delivery']) && $order['delivery'] == $did ? 'checked' : '';
-		$delivery['payments'] = json_encode($delivery['payments']);
+		$delivery['payments'] = $modx->toJSON($delivery['payments']);
 		$arrays['deliveries'][$did] = empty($tplDelivery)
 			? $pdoFetch->getChunk('', $delivery)
 			: $pdoFetch->getChunk($tplDelivery, $delivery);
 	}
 }
 
-if (!empty($tplOuter)) {$pdoFetch->getChunk($tplOuter);}
-//$cart_status = $miniShop2->cart->status();
 $order_cost = $miniShop2->order->getcost();
 $deliveries = implode('', $arrays['deliveries']);
 $payments = implode('', $arrays['payments']);
@@ -104,28 +103,37 @@ if ($isAuthenticated = $modx->user->isAuthenticated()) {
 	$profile = $modx->user->Profile->toArray();
 }
 $user_fields = array(
-	'receiver' => 'fullname'
-	,'phone' => 'phone'
-	,'email' => 'email'
-	,'comment' => ''
-	,'index' => 'zip'
-	,'country' => 'country'
-	,'region' => 'state'
-	,'city' => 'city'
-	,'street' => 'address'
-	,'building' => ''
-	,'room' => ''
+	'receiver' => 'fullname',
+	'phone' => 'phone',
+	'email' => 'email',
+	'comment' => 'extended[comment]',
+	'index' => 'zip',
+	'country' => 'country',
+	'region' => 'state',
+	'city' => 'city',
+	'street' => 'address',
+	'building' => 'extended[building]',
+	'room' => 'extended[room]',
 );
 foreach ($user_fields as $key => $value) {
-	if (!empty($order[$key])) {
-		$form[$key] = $order[$key];
-		unset($order[$key]);
-	}
-	else if (!empty($profile) && !empty($value)) {
-		$tmp = $miniShop2->order->add($key, $profile[$value]);
+	if (!empty($profile) && !empty($value)) {
+		if (strpos($value, 'extended') !== false) {
+			$tmp = substr($value, 9, -1);
+			$value = !empty($profile['extended'][$tmp])
+				? $profile['extended'][$tmp]
+				: '';
+		}
+		else {
+			$value = $profile[$value];
+		}
+		$tmp = $miniShop2->order->add($key, $value);
 		if ($tmp['success'] && !empty($tmp['data'][$key])) {
 			$form[$key] = $tmp['data'][$key];
 		}
+	}
+	if (empty($form[$key]) && !empty($order[$key])) {
+		$form[$key] = $order[$key];
+		unset($order[$key]);
 	}
 }
 $form = array_merge($order, $form);

@@ -8,10 +8,11 @@ if (!$modx->loadClass('pdofetch', MODX_CORE_PATH . 'components/pdotools/model/pd
 $pdoFetch = new pdoFetch($modx, $scriptProperties);
 
 $cart = $miniShop2->cart->get();
+$status = $miniShop2->cart->status();
 if (!empty($_GET['msorder'])) {
 	return '';
 }
-else if (empty($cart)) {
+elseif (empty($status['total_count'])) {
 	return !empty($tplEmpty) ? $pdoFetch->getChunk($tplEmpty) : '';
 }
 
@@ -66,10 +67,16 @@ foreach ($cart as $k => $v) {
 	$pdoFetch->config = array_merge($pdoFetch->config, $default, $scriptProperties);
 	$rows = $pdoFetch->run();
 
-	if (!empty($rows[0])) {
+	// If not empty and relevant to the context, then show
+	if (!empty($rows[0]) && (empty($v['ctx']) || $v['ctx'] == $modx->context->key)) {
 		$row = $rows[0];
 		$row['key'] = $k;
 		$row['count'] = $v['count'];
+		$row['old_price'] = $miniShop2->formatPrice(
+			$row['price'] != $v['price']
+				? $row['price']
+				: $row['old_price']
+		);
 		$row['price'] = $miniShop2->formatPrice($v['price']);
 		$row['weight'] = $miniShop2->formatWeight($v['weight']);
 		$row['cost'] = $miniShop2->formatPrice($v['count'] * $v['price']);

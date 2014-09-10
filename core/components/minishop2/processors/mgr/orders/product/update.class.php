@@ -7,6 +7,17 @@ class msOrderProductUpdateProcessor extends modObjectUpdateProcessor {
 	/* @var msOrder $order */
 	protected $order;
 
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
+
+
+	/** {@inheritDoc} */
 	public function beforeSet() {
 		$count = $this->getProperty('count');
 		if ($count <= 0) {
@@ -39,6 +50,8 @@ class msOrderProductUpdateProcessor extends modObjectUpdateProcessor {
 		return !$this->hasErrors();
 	}
 
+
+	/** {@inheritDoc} */
 	public function afterSave() {
 		$this->order->updateProducts();
 	}

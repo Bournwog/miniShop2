@@ -1,18 +1,132 @@
 Changelog for miniShop2.
 
-2.1.0 rc (Thanks to Alexey Kartashov)
+2.1.8 pl3
 ==============
-- [#59] Improved regular expression for email verification.
-- [#59] Improved validation of customer name and email when create order.
-- [#59] msOrderHandler::add() now can return an error.
-- [#59] Improved registration of javascript on frontend.
-- [#59] Improved show\hide of msMiniCart with css.
-- [#59] Refactored default frontend javascript.
-- [#59] Works with no javascript.
-- Small improvements of product gallery ui.
+- Fixed controllers for MODX 2.3.
+- Fixed routes to processors for MODX 2.3.
+- Fixed product getlist processor for MODX 2.3.
+- Fixed sorting products in category grid by clicking on column header.
+- Disabled Bootstrap icons for MODX 2.3.
+- Fixed product gallery for MODX 2.3.
+- Fixed issue with deleting product files children in MODX 2.3.
+- Fixed "autocomplete_err_noquery" error in MODX 2.3.
+- [#148] Fixed duplicate connector.
+- Fixed work of "minishop2-combo-user" in MODX 2.3.
 
-2.1.0 beta2
+2.1.8 beta
 ==============
+- Added field "name" in object msOrderProduct for storing pagetitle of the product.
+- Fixed log level in PayPal method.
+- Added integer field "type" to msOrder.
+- Fixed CustomerProfile connection in schema.
+- Improved price and weight formatting in orders table.
+- Some UI improvements and fixes.
+
+2.1.7 pl5
+==============
+- [#131] Fixed update of product thumb when you update thumbnails.
+- [#129] [msGetOrder] Fixed setting of placeholders.
+- Fixed work with comments on product panel.
+- [msOrder] Now snippet loads "building", "room" and "comment" from extended field of users profile.
+- [mgr] Fixed parameter "maxUploadSize" in gallery.
+
+2.1.7 pl1
+==============
+- [#119] Improved compatibility with AjaxManager.
+- [#118] Fixed negative cost in payment and delivery methods.
+- [#113] Added Lithuanian lexicons.
+- [#112] Restrict cart items to specific contexts.
+- [#111] Fixed remove of products links.
+- [#107] Fixed empty customer field if fullname is not specified.
+- [#106] Additional check of friendly filename in gallery.
+- New system setting "ms2_category_remember_grid".
+
+2.1.6 pl4
+==============
+- [#110] Fix generate thumbs on upload for Amazon S3.
+- Fixed counting money spent in new customers.
+- [#104] Fixed placeholder [[+cart_weight]] in emails.
+- [#102] Improved checking of thumbnails url.
+- [#98] Refactored permissions in processors.
+- [#94] Formatted placeholder [[+cost]] in snippet msCart
+- [#78] Fixed setting flag isfolder to false for old category of the product.
+- Fixed handling of non-ajax requests.
+- Removed unnecessary ajax request on add to cart. Fixed possibly E_NOTICE.
+
+2.1.5 pl
+==============
+- Improved rename of files in gallery.
+- Added default media source in product "create" processor.
+- Added default template in product "create" processor.
+- Added buttons in orders management page.
+
+2.1.4 pl5
+==============
+- Added script for import products in core/components/minishop2/import/csv.php.
+- Fixed icons in chunks.
+- [#95] Fixed price and weight format.
+- Improved installator. Now you can update chunks on install.
+- Fixed possible errors on thumbnail generation.
+- Progressive thumbnails in gallery.
+
+2.1.3 pl2
+==============
+- Support Bootstrap3.
+- Fixed E_WARNING in snippet msOptions.
+- Fixed bug with php-apc on create order.
+
+2.1.2 pl2
+==============
+- Fixed possibly E_NOTICE in snippets.
+
+2.1.2 pl
+==============
+- [#77] Fixed change type of existing resource to "msProduct".
+- Added ability to hide tabs of product page in manager. See new system settings.
+- Improved style of horizontal product tabs.
+- Improved proportions in settings tab of category.
+- Improved rename of product images.
+- Improved retrieving of first thumbnail of image in gallery.
+- If you specified wrong "ms2_product_thumbnail_size" parameter, gallery will still work.
+- Added support of non-image files in gallery.
+- Improved snippet "msGallery" for display non-image files.
+- [#84] Fixed displaying of  email of vendor in manager.
+
+2.1.1 pl2
+==============
+- Fixed parameter "&parents" in msProducts.
+
+2.1.1 pl
+==============
+- Snippet msProducts supports pdoTools 1.8.0. Parameter "&showHidden" enabled by default.
+- Fixed fatal error with "clearCache" when msProduct created trough processor and it`s parent is not msCategory.
+- Improved generation of thumbnails.
+
+2.1.1 pl
+==============
+- Fixed access permissions tab on product update.
+- Fixed getPrice and getWeight calls in snippet msProducts.
+- Improved xtype "minishop2-combo-user".
+- Added support of component "msDiscount".
+- Added counting of total spent sum by every customer in msCustomerProfile.
+
+2.1.0 pl2
+==============
+- Fixed placeholders on msProduct page due to issues with @INLINE chunks.
+
+2.1.0 pl1
+==============
+- Added new events: "msOnGetProductPrice" and "msOnGetProductWeight".
+- Fixed wrong events in database from previous release.
+- Changed "vendor_" to "vendor." in msProduct::toArray() for sameness with the snippet msProducts.
+- Moved all logic from old action.php to new plugin. File leaved for compatibility with users modified javascript.
+
+2.1.0 pl
+==============
+- Changed default sort in goods grid on "menuindex, ASC".
+- Improved method msDelivery::getCost().
+- Added method msPayment::getCost().
+- Improved method msOrderHandler::getCost(). Now you can specify additional percent for delivery and payment in manager.
 - New object "msCustomerProfile". It can be extended by plugins like "msProductData".
 - Plugin "miniShop2" can automatic save referrers.
 - In snippet "msProducts" you can override "where", "select", "leftJoin", "innerJoin" and "rightJoin" properties. Added pdoFetch 1.4.1 support.
@@ -23,19 +137,35 @@ Changelog for miniShop2.
 - Added new parameters for media source: "maxUploadWidth" and "maxUploadHeight" for frontend image resize.
 - Gallery upload processor now can receive parameters "id" and "file" for external images upload.
 - Added renaming files of product gallery together with thumbnails.
+- [#77] Fixed changing type of existing resource to "msCategory".
+- [#76] Fixed parameter "offset" in msGallery.
+- [#75] Remove multi-category links when category removed.
+- [#74] Refresh data in order from users profile if he is authenticated.
+- [#73] Added virtual vendor fields. You can get it by $res->get('vendor_name');
 - [#66] Fixed saving payments methods when create a new delivery.
 - [#65] Added new system events: "msOnBeforeValidateOrderValue" and "msOnValidateOrderValue".
 - [#64] Added ability to stop switching order status from system plugin.
 - [#63] Added new parameters for media source: "imageNameType". Switching to "friendly" will generate names for uploaded files by FURLs algorithm.
 - [#61] Added ability to sort products in category by drag and drop.
 - [#62] Fixed work with "*.gif" files in products gallery.
+- [#59] Improved regular expression for email verification.
+- [#59] Improved validation of customer name and email when create order.
+- [#59] msOrderHandler::add() now can return an error.
+- [#59] Improved registration of javascript on frontend.
+- [#59] Improved show\hide of msMiniCart with css.
+- [#59] Refactored default frontend javascript.
+- [#59] Works with no javascript. (Thanks to Alexey Kartashov)
 - [#58] Fixed PayPal non-USD currency.
 - [#56] Added JSON field "properties" to "msProductFile".
 - [#52] Added ability to customize orders in manager by 3 system setting: "ms2_order_grid_fields", "ms2_order_address_fields" and "ms2_order_product_fields".
 - [#50] Fixed checking of the existence of the Tickets component.
+- [#5] Possible fixed "Cannot execute queries while other unbuffered queries are active" on php < 5.3.
 - Some fixes for MySql STRICT_TRANS_TABLES mode.
 - Updated jQuery to version 1.10.2
-- Added method PayPal::getPaymentLink for continuing interrupted payment process. You will see [[+payment_link]] in emails.
+- Added method PayPal::getPaymentLink() for continuing interrupted payment process. You will see [[+payment_link]] in emails.
+- Added parameters "&tplSingle" and "&toSeparatePlaceholders" to snippet msGallery.
+- Gallery UI improvements for MODX 2.2.9
+- Returned action.php for backward compatibility with the old javascript
 
 2.0.1 pl3
 ==============

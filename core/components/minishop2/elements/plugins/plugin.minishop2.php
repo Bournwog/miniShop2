@@ -2,21 +2,34 @@
 switch ($modx->event->name) {
 
 	case 'OnManagerPageBeforeRender':
-		$cssFile = MODX_ASSETS_URL . 'components/minishop2/css/mgr/main.css';
-		$modx->controller->addCss($cssFile);
+		$modx23 = !empty($modx->version) && version_compare($modx->version['full_version'], '2.3.0', '>=');
+		$modx->controller->addHtml('<script type="text/javascript">
+			Ext.onReady(function() {
+				MODx.modx23 = '.(int)$modx23.';
+			});
+		</script>');
+		if (!$modx23) {
+			$modx->controller->addCss(MODX_ASSETS_URL . 'components/minishop2/css/mgr/bootstrap.min.css');
+		}
+		$modx->controller->addCss(MODX_ASSETS_URL . 'components/minishop2/css/mgr/main.css');
 		break;
 
 	case 'OnHandleRequest':
-		if (empty($_REQUEST['ms2_action'])) {return;}
+	case 'OnLoadWebDocument':
+		$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest';
 
+		if (empty($_REQUEST['ms2_action']) || ($isAjax && $modx->event->name != 'OnHandleRequest') || (!$isAjax && $modx->event->name != 'OnLoadWebDocument')) {return;}
 		$action = trim($_REQUEST['ms2_action']);
-		$isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest');
-		$ctx = !empty($_REQUEST['ctx']) ? $_REQUEST['ctx'] : 'web';
+		$ctx = !empty($_REQUEST['ctx']) ? (string) $_REQUEST['ctx'] : 'web';
 		if ($ctx != 'web') {$modx->switchContext($ctx);}
+
 		/* @var miniShop2 $miniShop2 */
 		$miniShop2 = $modx->getService('minishop2');
 		$miniShop2->initialize($ctx, array('json_response' => $isAjax));
-		if (($modx->error->hasError() || !($miniShop2 instanceof miniShop2)) && $isAjax) {exit('Could not initialize miniShop2');}
+		if (!($miniShop2 instanceof miniShop2)) {
+			@session_write_close();
+			exit('Could not initialize miniShop2');
+		}
 
 		switch ($action) {
 			case 'cart/add': $response = $miniShop2->cart->add(@$_POST['id'], @$_POST['count'], @$_POST['options']); break;
@@ -64,6 +77,32 @@ switch ($modx->event->name) {
 				}
 			}
 			setcookie($cookieVar, '', time() - $cookieTime);
+		}
+		break;
+
+	case 'msOnChangeOrderStatus':
+		if (empty($status) || $status != 2) {return;}
+
+		/** @var modUser $user */
+		if ($user = $order->getOne('User')) {
+			$q = $modx->newQuery('msOrder', array('type' => 0));
+			$q->innerJoin('modUser', 'modUser', array('`modUser`.`id` = `msOrder`.`user_id`'));
+			$q->innerJoin('msOrderLog', 'msOrderLog', array(
+				'`msOrderLog`.`order_id` = `msOrder`.`id`',
+				'msOrderLog.action' => 'status',
+				'msOrderLog.entry' => $status,
+			));
+			$q->where(array('msOrder.user_id' => $user->id));
+			$q->groupby('msOrder.user_id');
+			$q->select('SUM(`msOrder`.`cost`)');
+			if ($q->prepare() && $q->stmt->execute()) {
+				$spent = $q->stmt->fetch(PDO::FETCH_COLUMN);
+				/** @var msCustomerProfile $profile */
+				if ($profile = $modx->getObject('msCustomerProfile', $user->id)) {
+					$profile->set('spent', $spent);
+					$profile->save();
+				}
+			}
 		}
 		break;
 }

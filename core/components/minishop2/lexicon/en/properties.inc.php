@@ -36,6 +36,7 @@ $_lang['ms2_prop_showHidden'] = 'Show goods, that hidden in menu.';
 $_lang['ms2_prop_showZeroPrice'] = 'Show goods with zero price.';
 
 $_lang['ms2_prop_tplRow'] = 'Chunk for template one row of query.';
+$_lang['ms2_prop_tplSingle'] = 'Chunk for template single row of query.';
 $_lang['ms2_prop_tplOuter'] = 'Wrapper for template results of snippet work.';
 $_lang['ms2_prop_tplEmpty'] = 'Chunk that returns when no results.';
 $_lang['ms2_prop_tplSuccess'] = 'Chunk with successfull message about snippet work.';
@@ -47,3 +48,4 @@ $_lang['ms2_prop_tplDeliveriesRow'] = 'Chunk to process a way of delivery.';
 $_lang['ms2_prop_product'] = 'Id of the product. If empty, will used id of the current document.';
 $_lang['ms2_prop_optionSelected'] = 'Name of the active option, for setting attribute "selected"';
 $_lang['ms2_prop_optionName'] = 'Name of the option for displaying.';
+$_lang['ms2_prop_filetype'] = 'Type of files for select. You can use "image" for images and extensions for other files. For example "image,pdf,xls,doc".';

@@ -7,6 +7,17 @@ class msOrderProductCreateProcessor extends modObjectCreateProcessor {
 	/* @var msOrder $order */
 	protected $order;
 
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
+
+
+	/** {@inheritDoc} */
 	public function beforeSet() {
 		$count = $this->getProperty('count');
 		if ($count <= 0) {
@@ -39,6 +50,8 @@ class msOrderProductCreateProcessor extends modObjectCreateProcessor {
 		return !$this->hasErrors();
 	}
 
+
+	/** {@inheritDoc} */
 	public function beforeSave() {
 		$this->object->fromArray(array(
 			'rank' => $this->modx->getCount('msOrderProduct')

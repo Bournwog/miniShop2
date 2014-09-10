@@ -16,7 +16,9 @@ if (!($product instanceof msProduct)) {
 }
 elseif (!empty($name) && $options = $product->get($name)) {
 	if (!is_array($options) || $options[0] == '') {
-		$output = !empty($tplEmpty) ? $pdoFetch->getChunk($tplEmpty, $scriptProperties) : '';
+		$output = !empty($tplEmpty)
+			? $pdoFetch->getChunk($tplEmpty, $scriptProperties)
+			: '';
 	}
 	else {
 		$rows = array();
@@ -30,7 +32,7 @@ elseif (!empty($name) && $options = $product->get($name)) {
 
 		$rows = implode($outputSeparator, $rows);
 		$output = empty($tplOuter)
-			? $pdoFetch->getChunk('', $rows)
+			? $pdoFetch->getChunk('', array('name' => $name, 'rows' => $rows))
 			: $pdoFetch->getChunk($tplOuter, array_merge($scriptProperties, array('name' => $name, 'rows' => $rows)));
 	}
 }

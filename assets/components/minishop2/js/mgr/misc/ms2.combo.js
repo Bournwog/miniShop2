@@ -9,19 +9,29 @@ miniShop2.combo.User = function(config) {
 		,displayField: 'username'
 		,valueField: 'id'
 		,anchor: '99%'
-		,fields: ['username','id']
+		,fields: ['username','id','fullname']
 		,pageSize: 20
-		,url: MODx.config.connectors_url + 'security/user.php'
+		,url: MODx.modx23
+			? MODx.config.connector_url
+			: MODx.config.connectors_url + 'security/user.php'
 		,typeAhead: true
 		,editable: true
 		,action: 'getList'
 		,allowBlank: true
 		,baseParams: {
-			action: 'getlist'
+			action: MODx.modx23
+				? 'security/user/getlist'
+				: 'getlist'
 			,combo: 1
 			,id: config.value
 			//,limit: 0
 		}
+		,tpl: new Ext.XTemplate(''
+			+'<tpl for="."><div class="x-combo-list-item">'
+				+'<small>({id})</small> <b>{username}</b><br/>{fullname}</span>'
+			+'</div></tpl>',{
+			compiled: true
+		})
 	});
 	miniShop2.combo.User.superclass.constructor.call(this,config);
 };
@@ -49,7 +59,7 @@ miniShop2.combo.Category = function(config) {
 			//,limit: 0
 		}
 		,tpl: new Ext.XTemplate(''
-			+'<tpl for="."><div class="minishop2-category-list-item">'
+			+'<tpl for="."><div class="x-combo-list-item minishop2-category-list-item">'
 			+'<tpl if="parents">'
 					+'<span class="parents">'
 						+'<tpl for="parents">'
@@ -202,13 +212,14 @@ miniShop2.combo.Options = function(config) {
 		,valueField: 'value'
 		,triggerAction: 'all'
 		,extraItemCls: 'x-tag'
+		,expandBtnCls: MODx.modx23 ? 'x-form-trigger' : 'x-superboxselect-btn-expand'
+		,clearBtnCls: MODx.modx23 ? 'x-form-trigger' : 'x-superboxselect-btn-clear'
 		,listeners: {
-			newitem: function(bs,v, f){
-				var newObj = {
-					tag: v
-				};
-				bs.addItem(newObj);
-			}
+			newitem: function(bs,v, f) {bs.addItem({tag: v});}
+			,select: {fn:MODx.fireResourceFormChange, scope:this}
+			,beforeadditem: {fn:MODx.fireResourceFormChange, scope:this}
+			,beforeremoveitem: {fn:MODx.fireResourceFormChange, scope:this}
+			,clear: {fn:MODx.fireResourceFormChange, scope:this}
 		}
 	});
 	config.name += '[]';
@@ -542,7 +553,7 @@ miniShop2.combo.Product = function(config) {
 			,id: config.value
 		}
 		,tpl: new Ext.XTemplate(''
-			+'<tpl for="."><div class="minishop2-product-list-item">'
+			+'<tpl for="."><div class="x-combo-list-item minishop2-product-list-item">'
 				+'<tpl if="parents">'
 					+'<span class="parents">'
 						+'<tpl for="parents">'

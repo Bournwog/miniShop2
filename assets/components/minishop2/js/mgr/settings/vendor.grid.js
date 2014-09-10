@@ -13,7 +13,7 @@ miniShop2.grid.Vendor = function(config) {
 		,baseParams: {
 			action: 'mgr/settings/vendor/getlist'
 		}
-		,fields: ['id','name','resource','country','logo','address','phone','fax','description']
+		,fields: ['id','name','resource','country','email','logo','address','phone','fax','description']
 		,autoHeight: true
 		,paging: true
 		,remoteSort: true
@@ -104,7 +104,7 @@ Ext.extend(miniShop2.grid.Vendor,MODx.grid.Grid,{
 
 		MODx.msg.confirm({
 			title: _('ms2_menu_remove') + '"' + this.menu.record.name + '"'
-			,text: _('ms2_menu_remove_remove_confirm')
+			,text: _('ms2_menu_remove_confirm')
 			,url: this.config.url
 			,params: {
 				action: 'mgr/settings/vendor/remove'
@@ -144,6 +144,7 @@ miniShop2.window.CreateVendor = function(config) {
 		title: _('ms2_menu_create')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url
@@ -164,6 +165,7 @@ miniShop2.window.UpdateVendor = function(config) {
 		title: _('ms2_menu_update')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url

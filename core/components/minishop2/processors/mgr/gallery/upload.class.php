@@ -1,13 +1,21 @@
 <?php
 
 class msProductFileUploadProcessor extends modObjectProcessor {
-	/* @var msProduct $product */
-	private $product = 0;
+	public $classKey = 'msProductFile';
+	public $ObjectKey = 'msProductFile';
 	public $languageTopics = array('minishop2:default','minishop2:product');
+	public $permission = 'msproductfile_save';
 	/* @var modMediaSource $mediaSource */
 	public $mediaSource;
+	/* @var msProduct $product */
+	private $product = 0;
 
+
+	/** {@inheritDoc} */
 	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
 		/* @var msProduct $product */
 		$id = $this->getProperty('id', @$_GET['id']);
 		if (!$product = $this->modx->getObject('msProduct', $id)) {
@@ -21,6 +29,8 @@ class msProductFileUploadProcessor extends modObjectProcessor {
 		return true;
 	}
 
+
+	/** {@inheritDoc} */
 	public function process() {
 		if (!$data = $this->handleFile ()) {
 			return $this->failure($this->modx->lexicon('ms2_err_gallery_ns'));
@@ -51,25 +61,29 @@ class msProductFileUploadProcessor extends modObjectProcessor {
 		$filename = !empty($properties['imageNameType']) && $properties['imageNameType']['value'] == 'friendly'
 			? $this->product->cleanAlias($data['name'])
 			: $hash . '.' . $extension;
+		if (strpos($filename, '.'.$extension) === false) {
+			$filename .= '.'.$extension;
+		}
 
 		/* @var msProductFile $product_file */
 		$product_file = $this->modx->newObject('msProductFile', array(
-			'product_id' => $this->product->id
-			,'parent' => 0
-			,'name' => $data['name']
-			,'file' => $filename
-			,'path' => $this->product->id.'/'
-			,'source' => $this->mediaSource->get('id')
-			,'type' => $type
-			,'rank' => $this->modx->getCount('msProductFile', array('parent' => 0, 'product_id' => $this->product->id))
-			,'createdon' => date('Y-m-d H:i:s')
-			,'createdby' => $this->modx->user->id
-			,'active' => 1
-			,'hash' => $hash
-			,'properties' => $data['properties']
+			'product_id' => $this->product->id,
+			'parent' => 0,
+			'name' => $data['name'],
+			'file' => $filename,
+			'path' => $this->product->id.'/',
+			'source' => $this->mediaSource->get('id'),
+			'type' => $type,
+			'rank' => $this->modx->getCount('msProductFile', array('parent' => 0, 'product_id' => $this->product->id)),
+			'createdon' => date('Y-m-d H:i:s'),
+			'createdby' => $this->modx->user->id,
+			'active' => 1,
+			'hash' => $hash,
+			'properties' => $data['properties'],
 		));
 
 		$this->mediaSource->createContainer($product_file->path, '/');
+		unset($this->mediaSource->errors['file']);
 		$file = $this->mediaSource->createObject(
 			$product_file->get('path')
 			,$product_file->get('file')
@@ -96,6 +110,9 @@ class msProductFileUploadProcessor extends modObjectProcessor {
 	}
 
 
+	/**
+	 * @return array|bool
+	 */
 	public function handleFile() {
 		$stream = $name = null;
 
@@ -114,7 +131,7 @@ class msProductFileUploadProcessor extends modObjectProcessor {
 			}
 		}
 		else {
-			$name = $_REQUEST['name'];
+			$name = $this->getProperty('name', @$_REQUEST['name']);
 			$stream = file_get_contents('php://input');
 		}
 
@@ -127,7 +144,7 @@ class msProductFileUploadProcessor extends modObjectProcessor {
 				)
 			);
 
-			$tf = tempnam(sys_get_temp_dir(), '.upload');
+			$tf = tempnam(MODX_BASE_PATH, 'ms_');
 			file_put_contents($tf, $stream);
 			$tmp = getimagesize($tf);
 			if (is_array($tmp)) {

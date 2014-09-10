@@ -7,7 +7,7 @@ miniShop2.grid.Status = function(config) {
 		,renderer : function(v, p, record){return record.data.description != '' && record.data.description != null ? '<div class="x-grid3-row-expander">&#160;</div>' : '&#160;';}
 	});
 	this.dd = function(grid) {
-		new Ext.dd.DropTarget(grid.container, {
+		this.dropTarget = new Ext.dd.DropTarget(grid.container, {
 			ddGroup : 'dd',
 			copy:false,
 			notifyDrop : function(dd, e, data) {
@@ -213,6 +213,13 @@ Ext.extend(miniShop2.grid.Status,MODx.grid.Grid,{
 			body.hide().disable();
 		}
 	}
+
+	,beforeDestroy: function() {
+		if (this.rendered) {
+			this.dropTarget.destroy();
+		}
+		miniShop2.grid.Status.superclass.beforeDestroy.call(this);
+	}
 });
 Ext.reg('minishop2-grid-status',miniShop2.grid.Status);
 
@@ -226,6 +233,7 @@ miniShop2.window.CreateStatus = function(config) {
 		title: _('ms2_menu_create')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url
@@ -246,6 +254,7 @@ miniShop2.window.UpdateStatus = function(config) {
 		title: _('ms2_menu_update')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url

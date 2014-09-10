@@ -1,3 +1,8 @@
+/* boostrap icons fix */
+[class^="bicon-"],[class*=" bicon-"] {background-image:url("../../img/mgr/glyphicons-halflings.png");}
+.bicon-white,.nav-pills>.active>a>[class^="bicon-"],.nav-pills>.active>a>[class*=" bicon-"],.nav-list>.active>a>[class^="bicon-"],.nav-list>.active>a>[class*=" bicon-"],.navbar-inverse .nav>.active>a>[class^="bicon-"],.navbar-inverse .nav>.active>a>[class*=" bicon-"],.dropdown-menu>li>a:hover>[class^="bicon-"],.dropdown-menu>li>a:hover>[class*=" bicon-"],.dropdown-menu>.active>a>[class^="bicon-"],.dropdown-menu>.active>a>[class*=" bicon-"],.dropdown-submenu:hover>a>[class^="bicon-"],.dropdown-submenu:hover>a>[class*=" bicon-"]{background-image:url("../../img/mgr/glyphicons-halflings-white.png");}
+
+/* main styles */
 a.link, a.ms2-link {color: #005580;}
 .ms2-image-inactive {opacity: .8;}
 .x-color-palette {width:80%;height:auto;cursor:pointer}
@@ -9,6 +14,7 @@ input.disabled {color: #AAA !important;}
 .btn-green button {color: green;}
 .btn-red button {color: red;}
 .btn-brown button {color: brown;}
+.btn-orange button {color: darkgoldenrod;}
 
 .icon-mscategory .x-tree-node-icon, .icon-msproduct .x-tree-node-icon {background-image: url(../../img/mgr/ms2_icons.png) !important;}
 .icon-mscategory .x-tree-node-icon {background-position: -1px 0;}
@@ -19,7 +25,8 @@ input.disabled {color: #AAA !important;}
 .icon-msproduct:hover .x-tree-node-icon {background-position: -37px -18px;}
 
 
-.minishop2-grid .product-id {
+.minishop2-grid .product-id,
+.minishop2-grid .order-id {
 	font-size: 12px;
 	font-weight: normal;
 	display: block;
@@ -33,9 +40,14 @@ input.disabled {color: #AAA !important;}
 .minishop2-grid .main-column {
 	float: left;
 }
-.minishop2-grid .main-column a {float: left;}
 .minishop2-grid .main-column a {
+	float: left;
 	color:#005580;
+	line-height:.8em;
+	font-size:.8em;
+	text-decoration:none;
+}
+.minishop2-grid .main-column .title {
 	line-height:.8em;
 	font-size:.8em;
 	text-decoration:none;
@@ -56,8 +68,8 @@ input.disabled {color: #AAA !important;}
 	font-style: italic;
 	clear: both;
 }
-
-.minishop2-grid .product-title-column ul {
+.minishop2-grid .product-title-column ul,
+.minishop2-grid .order-title-column ul {
 	clear: both;
 }
 
@@ -65,19 +77,8 @@ input.disabled {color: #AAA !important;}
 .minishop2-panel-spacer .x-panel-body { background: transparent !important; }
 
 .actions a {
-	-moz-border-radius:3px;
-	-webkit-border-radius:3px;
-	-o-border-radius:3px;
-	-ms-border-radius:3px;
-	-khtml-border-radius:3px;
 	border-radius:3px;
 	background:#dcdcdc;
-	background:-moz-linear-gradient(center bottom,#dcdcdc 0%,#fcfcfc 100%) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fcfcfc),color-stop(100%,#dcdcdc));
-	background:-webkit-linear-gradient(center bottom,#dcdcdc 0%,#fcfcfc 100%);
-	background:-o-linear-gradient(center bottom,#dcdcdc 0%,#fcfcfc 100%);
-	background:-ms-linear-gradient(center bottom,#dcdcdc 0%,#fcfcfc 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcfcfc,endColorstr=#dcdcdc,GradientType=0);
 	background:linear-gradient(center bottom,#dcdcdc 0%,#fcfcfc 100%);
 	text-shadow:0 1px 0 #ffffff;
 	border:1px solid #cccccc;
@@ -92,76 +93,24 @@ input.disabled {color: #AAA !important;}
 }
 .actions a:hover {
 	background:#e0e0e0;
-	background:-moz-linear-gradient(center bottom,#e0e0e0 0%,#fcfcfc 100%) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fcfcfc),color-stop(100%,#e0e0e0));
-	background:-webkit-linear-gradient(center bottom,#e0e0e0 0%,#fcfcfc 100%);
-	background:-o-linear-gradient(center bottom,#e0e0e0 0%,#fcfcfc 100%);
-	background:-ms-linear-gradient(center bottom,#e0e0e0 0%,#fcfcfc 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#fcfcfc,endColorstr=#e0e0e0,GradientType=0);
 	background:linear-gradient(center bottom,#e0e0e0 0%,#fcfcfc 100%);
 	color:#5b7a98;
 }
 .actions a:active {
-	-moz-box-shadow:0 0 3px #aaaaaa inset;
-	-webkit-box-shadow:0 0 3px #aaaaaa inset;
-	-o-box-shadow:0 0 3px #aaaaaa inset;
 	box-shadow:0 0 3px #aaaaaa inset;
 	background-color:#ffffff;
 	background-image:none;
 }
-.actions a.orange, btn-orange button {
-	background:#febb4a;
-	background:-moz-linear-gradient(center bottom,#febb4a 0%,#feda71 100%) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#feda71),color-stop(100%,#febb4a));
-	background:-webkit-linear-gradient(center bottom,#febb4a 0%,#feda71 100%);
-	background:-o-linear-gradient(center bottom,#febb4a 0%,#feda71 100%);
-	background:-ms-linear-gradient(center bottom,#febb4a 0%,#feda71 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#feda71,endColorstr=#febb4a,GradientType=0);
-	background:linear-gradient(center bottom,#febb4a 0%,#feda71 100%);
-	border-color:#f5b74e #e7a93f #dfa138;
-	color:#996633;
-	text-shadow:0 1px 0 #fee1a0;
-}
-.actions a.orange:hover {
-	background:#fec95b;
-	background:-moz-linear-gradient(center bottom,#fec95b 0%,#fee1a0 100%) repeat scroll 0 0 transparent;
-	background:-webkit-gradient(linear,left top,left bottom,color-stop(0%,#fee1a0),color-stop(100%,#fec95b));
-	background:-webkit-linear-gradient(center bottom,#fec95b 0%,#fee1a0 100%);
-	background:-o-linear-gradient(center bottom,#fec95b 0%,#fee1a0 100%);
-	background:-ms-linear-gradient(center bottom,#fec95b 0%,#fee1a0 100%);
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#fee1a0,endColorstr=#fec95b,GradientType=0);
-	background:linear-gradient(center bottom,#fec95b 0%,#fee1a0 100%);
-}
 
-.minishop2-category-list-item, .minishop2-product-list-item {
-	font:normal 11px tahoma, arial, helvetica, sans-serif;
-	padding:3px 10px 3px 10px;
-	border:1px solid #fff;
-	border-bottom:1px solid #eeeeee;
-	white-space:normal;
-	color:#555;
-	cursor: pointer;
+.actions a.delete:hover {
+	color:brown;
+	text-shadow:0 1px 0 #fff;
 }
-.minishop2-category-list-item:hover, .minishop2-product-list-item:hover {
-	background: #efefef;
+.actions a.unpublish:hover {
+	color:darkgoldenrod;
+	text-shadow:0 1px 0 #fff;
 }
-
-.minishop2-category-list-item h3, .minishop2-product-list-item h3 {
-	display:block;
-	font:inherit;
-	font-weight:bold;
-	font-size: 1.1em;
-	line-height: 1.1em;
-}
-
-.minishop2-category-list-item .parents, .minishop2-product-list-item .parents {
-	display:block;
-	font:inherit;
-	font-weight:normal;
-	color:#555;
-	font-size: 1em;
-	line-height: 1em;
-}
+.minishop2-category-list-item .parents, .minishop2-product-list-item .parents {display:block;}
 
 #minishop2-product-header-image {
 	margin: auto;
@@ -180,81 +129,24 @@ input.disabled {color: #AAA !important;}
 
 
 
-
-
-/*
-For progress bar:
-*/
-
-td.x-grid3-td-progress-cell {
-	padding: 0;
-}
-
-td.x-grid3-td-progress-cell div.x-grid3-cell-inner {
-	padding: 0;
-	position: relative;
-	line-height: 36px;
-	height: 41px;
-}
-
-.ux-progress-cell-inner {
-	position: absolute;
-	top: 0;
-	left: 0;
-	height: 100%;
-	width: 100%;
-	overflow: hidden;
-}
-
-.ux-progress-cell-background {
-	background: #E0E8F3;
-	white-space: nowrap;
-}
-.x-grid3-td-progress-cell .low {
-	background: #11aa11;
-}
-.x-grid3-td-progress-cell .medium {
-	background: #f1fa1a;
-}
-.x-grid3-td-progress-cell .high {
-	background: #ee1111;
-}
-
-.ux-progress-cell-foreground {
-	color: #000;
-	background-color: #cadaba;
-	white-space: nowrap;
-	overflow: hidden
-}
-
-.ux-progress-cell-inner-right {
-	text-align: right;
-}
-
-.ux-progress-cell-inner-center {
-	text-align: center;
-}
-
-.ux-progress-cell .ux-progress-cell-inner div {
-	padding: 3px 0 0 4px;
-}
-
-.ux-progress-cell-inner-right div {
-	padding: 3px 4px 0 0;
-	position: relative;
-}
-
-.ux-progress-cell-inner-center div {
-	padding: 3px 0 0 0;
-	position: relative;
-}
-
-.ux-progress-cell-inner-left div {
-	padding: 3px 0 0 4px;
-	position: relative;
-}
-
-.modx-gallery-detail-thumb img {width: 300px; display: block; margin: auto;}
+/* Upload progress bar in product gallery */
+td.x-grid3-td-progress-cell {padding: 0;}
+td.x-grid3-td-progress-cell div.x-grid3-cell-inner {padding: 0;position: relative;line-height: 36px;height: 41px;}
+.ux-progress-cell-inner {position: absolute;top: 0;left: 0;height: 100%;width: 100%;overflow: hidden;}
+.ux-progress-cell-background {background: #E0E8F3;white-space: nowrap;}
+.x-grid3-td-progress-cell .low {background: #11aa11;}
+.x-grid3-td-progress-cell .medium {background: #f1fa1a;}
+.x-grid3-td-progress-cell .high {background: #ee1111;}
+.ux-progress-cell-foreground {color: #000;background-color: #cadaba;white-space: nowrap;overflow: hidden}
+.ux-progress-cell-inner-right {text-align: right;}
+.ux-progress-cell-inner-center {text-align: center;}
+.ux-progress-cell .ux-progress-cell-inner div {padding: 3px 0 0 4px;}
+.ux-progress-cell-inner-right div {padding: 3px 4px 0 0;position: relative;}
+.ux-progress-cell-inner-center div {padding: 3px 0 0 0;position: relative;}
+.ux-progress-cell-inner-left div {padding: 3px 0 0 4px;position: relative;}
+/* Gallery styles */
+.modx-gallery-detail-thumb img {max-width: 300px; display: block; margin: auto;}
 .modx-gallery-details-info,
 .modx-gallery-details-info .description {margin-top: 20px; padding-top: 20px; border-top: 1px solid #efefef;}
-
+.modx-gal-item-thumb {width: 120px; height: 90px; border:1px solid #efefef;}
+.modx-gal-item-thumb img {max-width: 120px; max-height: 90px; display: block; margin: auto;}

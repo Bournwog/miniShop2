@@ -7,15 +7,27 @@ class msProductUpdateProcessor extends modResourceUpdateProcessor {
 	public $classKey = 'msProduct';
 	public $languageTopics = array('resource','minishop2:default');
 	public $permission = 'msproduct_save';
-	public $objectType = 'resource';
 	public $beforeSaveEvent = 'OnBeforeDocFormSave';
 	public $afterSaveEvent = 'OnDocFormSave';
 	/** @var msProduct $object */
 	public $object;
-	/**
-	 * Handle formatting of various checkbox fields
-	 * @return void
-	 */
+
+
+	/** {inheritDoc} */
+	public function initialize() {
+		$primaryKey = $this->getProperty($this->primaryKeyField,false);
+		if (empty($primaryKey)) return $this->modx->lexicon($this->classKey.'_err_ns');
+
+		if (!$this->modx->getCount($this->classKey, array('id' => $primaryKey, 'class_key' => $this->classKey)) && $res = $this->modx->getObject('modResource', $primaryKey)) {
+			$res->set('class_key', $this->classKey);
+			$res->save();
+		}
+
+		return parent::initialize();
+	}
+
+
+	/** {inheritDoc} */
 	public function handleCheckBoxes() {
 		parent::handleCheckBoxes();
 		$this->setCheckbox('new');
@@ -23,10 +35,8 @@ class msProductUpdateProcessor extends modResourceUpdateProcessor {
 		$this->setCheckbox('favorite');
 	}
 
-	/**
-	 * Set publishedon date if publish change is different
-	 * @return int
-	 */
+
+	/** {inheritDoc} */
 	public function checkPublishedOn() {
 		$published = $this->getProperty('published',null);
 		if ($published !== null && $published != $this->object->get('published')) {
@@ -47,10 +57,8 @@ class msProductUpdateProcessor extends modResourceUpdateProcessor {
 		return $this->getProperty('publishedon');
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return string|mixed
-	 */
+
+	/** {inheritDoc} */
 	public function checkFriendlyAlias() {
 		if ($this->workingContext->getOption('ms2_product_id_as_alias')) {
 			$alias = $this->object->id;
@@ -62,10 +70,8 @@ class msProductUpdateProcessor extends modResourceUpdateProcessor {
 		return $alias;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return boolean
-	 */
+
+	/** {inheritDoc} */
 	public function beforeSave() {
 		$this->object->set('isfolder', 0);
 
@@ -73,9 +79,23 @@ class msProductUpdateProcessor extends modResourceUpdateProcessor {
 	}
 
 
-	/**
-	 * {@inheritDoc}
-	 */
+	/** {inheritDoc} */
+	public function fixParents() {
+		if (!empty($this->oldParent) && !($this->oldParent instanceof msCategory)) {
+			$oldParentChildrenCount = $this->modx->getCount('modResource', array('parent' => $this->oldParent->get('id')));
+			if ($oldParentChildrenCount <= 0 || $oldParentChildrenCount == null) {
+				$this->oldParent->set('isfolder', false);
+				$this->oldParent->save();
+			}
+		}
+
+		if (!empty($this->newParent)) {
+			$this->newParent->set('isfolder', true);
+		}
+	}
+
+
+	/** {inheritDoc} */
 	public function clearCache() {
 		parent::clearCache();
 		$this->object->clearCache();

@@ -1,16 +1,22 @@
 <?php
-/**
- * Get a list of Products Files
- *
- * @package minishop2
- * @subpackage processors
- */
 class msProductFileGetListProcessor extends modObjectGetListProcessor {
 	public $classKey = 'msProductFile';
+	public $languageTopics = array('default','minishop2:product');
 	public $defaultSortField = 'rank';
 	public $defaultSortDirection  = 'ASC';
-	public $languageTopics = array('default','minishop2:product');
+	public $permission = 'msproductfile_list';
 
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
+
+
+	/** {@inheritDoc} */
 	public function prepareQueryBeforeCount(xPDOQuery $c) {
 		$c->where(array('product_id' => $this->getProperty('product_id')));
 
@@ -19,39 +25,29 @@ class msProductFileGetListProcessor extends modObjectGetListProcessor {
 			$c->where(array('parent' => $parent));
 		}
 
-		if ($type = $this->getProperty('type')) {
-			$c->where(array('type' => $type));
-		}
-
 		return $c;
 	}
 
 
+	/** {@inheritDoc} */
 	public function prepareRow(xPDOObject $object) {
 		/* @var msProductFile $object */
 		$row = $object->toArray();
-		$tmp = $object->getFirstThumbnail();
-		$row['thumbnail'] = !empty($tmp['url']) ? $tmp['url'] : MODX_ASSETS_URL . 'components/minishop2/img/mgr/ms2_small.png';
-/*
-		$row['menu'] = array();
 
-		$row['menu'][] = array(
-			'text' => $this->modx->lexicon('ms2_gallery_image_update'),
-			'handler' => 'this.updateImage',
-		);
-		$row['menu'][] = array(
-			'text' => $this->modx->lexicon('ms2_gallery_image_generate_thumbs'),
-			'handler' => 'this.generateThumbnails',
-		);
-		$row['menu'][] = '-';
-		$row['menu'][] = array(
-			'text' => $this->modx->lexicon('ms2_gallery_image_update'),
-			'handler' => 'this.deleteImage',
-		);
-*/
+		if ($row['type'] != 'image') {
+			$row['thumbnail'] = (file_exists(MODX_ASSETS_PATH . 'components/minishop2/img/mgr/extensions/'.$row['type'].'.png'))
+				? MODX_ASSETS_URL . 'components/minishop2/img/mgr/extensions/'.$row['type'].'.png'
+				: MODX_ASSETS_URL . 'components/minishop2/img/mgr/extensions/other.png';
+		}
+		else {
+			$tmp = $object->getFirstThumbnail();
+			$row['thumbnail'] = !empty($tmp['url'])
+				? $tmp['url']
+				: MODX_ASSETS_URL . 'components/minishop2/img/mgr/ms2_small.png';
+		}
+
 		return $row;
 	}
-
 
 }
 

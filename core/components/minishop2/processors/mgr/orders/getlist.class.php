@@ -1,25 +1,35 @@
 <?php
-/**
- * Get a list of Orders
- *
- * @package minishop2
- * @subpackage processors
- */
+
 class msOrderGetListProcessor extends modObjectGetListProcessor {
 	public $classKey = 'msOrder';
+	public $languageTopics = array('default','minishop2:manager');
 	public $defaultSortField = 'id';
 	public $defaultSortDirection  = 'DESC';
-	public $languageTopics = array('default','minishop2:manager');
+	public $permission = 'msorder_list';
+	/** @var  miniShop2 $ms2 */
+	protected $ms2;
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		$this->ms2 = $this->modx->getService('miniShop2');
+
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
 
 
+	/** {@inheritDoc} */
 	public function prepareQueryBeforeCount(xPDOQuery $c) {
+		$c->leftJoin('modUser','modUser', '`msOrder`.`user_id` = `modUser`.`id`');
 		$c->leftJoin('modUserProfile','modUserProfile', '`msOrder`.`user_id` = `modUserProfile`.`internalKey`');
 		$c->leftJoin('msOrderStatus','msOrderStatus', '`msOrder`.`status` = `msOrderStatus`.`id`');
 		$c->leftJoin('msDelivery','msDelivery', '`msOrder`.`delivery` = `msDelivery`.`id`');
 		$c->leftJoin('msPayment','msPayment', '`msOrder`.`payment` = `msPayment`.`id`');
 
 		$orderColumns = $this->modx->getSelectColumns('msOrder', 'msOrder', '', array('status','delivery','payment'), true);
-		$c->select($orderColumns . ', `modUserProfile`.`fullname` as `customer`, `msOrderStatus`.`name` as `status`, `msOrderStatus`.`color`, `msDelivery`.`name` as `delivery`, `msPayment`.`name` as `payment`');
+		$c->select($orderColumns . ', `modUserProfile`.`fullname` as `customer`, `modUser`.`username` as `customer_username`, `msOrderStatus`.`name` as `status`, `msOrderStatus`.`color`, `msDelivery`.`name` as `delivery`, `msPayment`.`name` as `payment`');
 
 		if ($query = $this->getProperty('query')) {
 			$c->where(array(
@@ -35,6 +45,8 @@ class msOrderGetListProcessor extends modObjectGetListProcessor {
 		return $c;
 	}
 
+
+	/** {@inheritDoc} */
 	public function getData() {
 		$data = array();
 		$limit = intval($this->getProperty('limit'));
@@ -61,6 +73,8 @@ class msOrderGetListProcessor extends modObjectGetListProcessor {
 		return $data;
 	}
 
+
+	/** {@inheritDoc} */
 	public function iterate(array $data) {
 		$list = array();
 		$list = $this->beforeIteration($list);
@@ -74,8 +88,31 @@ class msOrderGetListProcessor extends modObjectGetListProcessor {
 		return $list;
 	}
 
+
+	/** {@inheritDoc} */
 	public function prepareArray(array $data) {
+		if (empty($data['customer'])) {
+			$data['customer'] = $data['customer_username'];
+		}
+		
 		$data['status'] = '<span style="color:#'.$data['color'].';">'.$data['status'].'</span>';
+
+		$data['actions'] = array(
+			array(
+				'className' => 'update',
+				'text' => $this->modx->lexicon('ms2_menu_update'),
+			),
+			array(
+				'className' => 'delete',
+				'text' => $this->modx->lexicon('ms2_menu_remove'),
+			),
+		);
+
+		if (isset($data['cost'])) {$data['cost'] = $this->ms2->formatPrice($data['cost']);}
+		if (isset($data['cart_cost'])) {$data['cart_cost'] = $this->ms2->formatPrice($data['cart_cost']);}
+		if (isset($data['delivery_cost'])) {$data['delivery_cost'] = $this->ms2->formatPrice($data['delivery_cost']);}
+		if (isset($data['weight'])) {$data['weight'] = $this->ms2->formatWeight($data['weight']);}
+
 		return $data;
 	}
 

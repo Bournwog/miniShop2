@@ -19,9 +19,13 @@ $tmp = array(
 		'type' => 'textfield',
 		'value' => 'tpl.msGallery.empty',
 	),
+	'tplSingle' => array(
+		'type' => 'textfield',
+		'value' => '',
+	),
 	'limit' => array(
 		'type' => 'numberfield',
-		'value' => 0,
+		'value' => 100,
 	),
 	'offset' => array(
 		'type' => 'numberfield',
@@ -43,6 +47,10 @@ $tmp = array(
 		'type' => 'textfield',
 		'value' => '',
 	),
+	'toSeparatePlaceholders' => array(
+		'type' => 'textfield',
+		'value' => '',
+	),
 	'showLog' => array(
 		'type' => 'combo-boolean',
 		'value' => false,
@@ -50,7 +58,12 @@ $tmp = array(
 	'where' => array(
 		'type' => 'textfield',
 		'value' => '',
-	)
+	),
+	'filetype' => array(
+		'type' => 'textfield',
+		'value' => '',
+		'desc' => 'ms2_prop_filetype',
+	),
 );
 
 foreach ($tmp as $k => $v) {

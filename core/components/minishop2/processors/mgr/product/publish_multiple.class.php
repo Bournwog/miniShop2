@@ -1,7 +1,9 @@
 <?php
 
 class msProductPublishMultipleProcessor extends modObjectProcessor {
+	public $classKey = 'msProduct';
 
+	/** {@inheritDoc} */
 	public function process() {
 		$ids = $this->getProperty('ids',null);
 		if (empty($ids)) {

@@ -32,7 +32,6 @@ class msProductUpdateManagerController extends ResourceUpdateManagerController {
 		$minishopAssetsUrl = $this->modx->getOption('minishop2.assets_url',null,$this->modx->getOption('assets_url',null,MODX_ASSETS_URL).'components/minishop2/');
 		$connectorUrl = $minishopAssetsUrl.'connector.php';
 		$minishopJsUrl = $minishopAssetsUrl.'js/mgr/';
-		$minishopCssUrl = $minishopAssetsUrl.'css/mgr/';
 		$minishopImgUrl = $minishopAssetsUrl.'img/mgr/';
 
 		// Customizable product fields feature
@@ -54,7 +53,6 @@ class msProductUpdateManagerController extends ResourceUpdateManagerController {
 
 		$showComments = class_exists('Ticket') && $this->modx->getOption('ms2_product_show_comments') ? 1 : 0;
 
-		$this->addCss($minishopCssUrl. 'bootstrap.min.css');
 		$this->addJavascript($mgrUrl.'assets/modext/util/datetime.js');
 		$this->addJavascript($mgrUrl.'assets/modext/widgets/element/modx.panel.tv.renders.js');
 		$this->addJavascript($mgrUrl.'assets/modext/widgets/resource/modx.grid.resource.security.local.js');
@@ -90,6 +88,9 @@ class msProductUpdateManagerController extends ResourceUpdateManagerController {
 			,main_fields: '.json_encode($product_main_fields).'
 			,extra_fields: '.json_encode($product_extra_fields).'
 			,vertical_tabs: '.$this->modx->getOption('ms2_product_vertical_tabs', null, true).'
+			,product_tab_extra: '.$this->modx->getOption('ms2_product_tab_extra', null, true).'
+			,product_tab_gallery: '.$this->modx->getOption('ms2_product_tab_gallery', null, true).'
+			,product_tab_links: '.$this->modx->getOption('ms2_product_tab_links', null, true).'
 			,data_fields: '.json_encode($product_data_fields).'
 			,additional_fields: []
 			,media_source: '.json_encode($this->getSourceProperties()).'
@@ -138,8 +139,9 @@ class msProductUpdateManagerController extends ResourceUpdateManagerController {
 		$ticketsJsUrl = $ticketsAssetsUrl.'js/mgr/';
 
 		$this->addJavascript($ticketsJsUrl.'tickets.js');
-		$this->addJavascript($ticketsJsUrl.'comment/comments.common.js');
-		$this->addJavascript($ticketsJsUrl.'comment/comments.grid.js');
+		$this->addLastJavascript($ticketsJsUrl.'misc/utils.js');
+		$this->addLastJavascript($ticketsJsUrl.'comment/comments.common.js');
+		$this->addLastJavascript($ticketsJsUrl.'comment/comments.grid.js');
 		$this->addHtml('
 		<script type="text/javascript">
 		// <![CDATA[
@@ -173,8 +175,9 @@ class msProductUpdateManagerController extends ResourceUpdateManagerController {
 	 * @return void
 	 * */
 	function prepareFields() {
+		$data = array_keys($this->modx->getFieldMeta('msProductData'));
 		foreach ($this->resourceArray as $k => $v) {
-			if (is_array($v)) {
+			if (is_array($v) && in_array($k, $data)) {
 				$tmp = $this->resourceArray[$k];
 				$this->resourceArray[$k] = array();
 				foreach ($tmp as $v2) {

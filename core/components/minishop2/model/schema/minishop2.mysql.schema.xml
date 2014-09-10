@@ -6,7 +6,7 @@
 		<field key="class_key" dbtype="varchar" precision="100" phptype="string" null="false" default="msCategory" />
 
 		<aggregate alias="OwnProducts" class="msProduct" local="id" foreign="parent" cardinality="many" owner="local" />
-		<aggregate alias="AlienProducts" class="msCategoryMember" local="id" foreign="category_id" cardinality="many" owner="local" />
+		<composite alias="AlienProducts" class="msCategoryMember" local="id" foreign="category_id" cardinality="many" owner="local" />
 	</object>
 
 
@@ -15,6 +15,8 @@
 
 		<aggregate alias="Category" class="msCategory" local="parent" foreign="id" cardinality="one" owner="foreign" />
 		<composite alias="Data" class="msProductData" local="id" foreign="id" cardinality="one" owner="local" />
+		<composite alias="Categories" class="msCategoryMember" local="id" foreign="product_id" cardinality="many" owner="local" />
+		<composite alias="Options" class="msProductOption" local="id" foreign="product_id" cardinality="many" owner="local" />
 	</object>
 
 
@@ -151,7 +153,7 @@
 	<object class="msDelivery" table="ms2_deliveries" extends="xPDOSimpleObject">
 		<field key="name" dbtype="varchar" precision="255" phptype="string" null="false" />
 		<field key="description" dbtype="text" phptype="string" null="true" />
-		<field key="price" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
+		<field key="price" dbtype="varchar" precision="11" phptype="string" null="true" default="0" />
 		<field key="weight_price" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
 		<field key="distance_price" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
 		<field key="logo" dbtype="varchar" precision="255" phptype="string" null="true" />
@@ -169,6 +171,7 @@
 	<object class="msPayment" table="ms2_payments" extends="xPDOSimpleObject">
 		<field key="name" dbtype="varchar" precision="255" phptype="string" null="false" />
 		<field key="description" dbtype="text" phptype="string" null="true" />
+		<field key="price" dbtype="varchar" precision="11" phptype="string" null="true" default="0" />
 		<field key="logo" dbtype="varchar" precision="255" phptype="string" null="true" />
 		<field key="rank" dbtype="tinyint" precision="1" attributes="unsigned" phptype="integer" null="true" default="0" />
 		<field key="active" dbtype="tinyint" precision="1" attributes="unsigned" phptype="integer" null="true" default="1" />
@@ -210,6 +213,7 @@
 		<field key="context" dbtype="varchar" precision="100" phptype="string" null="true" default="web" />
 		<field key="comment" dbtype="text" phptype="string" null="true" />
 		<field key="properties" dbtype="text" phptype="json" null="true" />
+		<field key="type" dbtype="tinyint" precision="3" phptype="integer" attributes="unsigned" null="true" default="0" />
 
 		<index alias="user_id" name="user_id" primary="false" unique="false" type="BTREE" >
 			<column key="user_id" length="" collation="A" null="false" />
@@ -217,10 +221,13 @@
 		<index alias="status" name="status" primary="false" unique="false" type="BTREE" >
 			<column key="status" length="" collation="A" null="false" />
 		</index>
+		<index alias="type" name="type" primary="false" unique="false" type="BTREE" >
+			<column key="type" length="" collation="A" null="false" />
+		</index>
 
 		<aggregate alias="User" class="modUser" local="user_id" foreign="id" cardinality="one" owner="foreign" />
 		<aggregate alias="UserProfile" class="modUserProfile" local="user_id" foreign="internalKey" owner="foreign" cardinality="one" />
-		<aggregate alias="CustomerProfile" class="msCustomerProfile" local="user_id" foreign="internalKey" owner="foreign" cardinality="one" />
+		<aggregate alias="CustomerProfile" class="msCustomerProfile" local="user_id" foreign="id" owner="foreign" cardinality="one" />
 		<aggregate alias="Status" class="msOrderStatus" local="status" foreign="id" cardinality="one" owner="foreign" />
 		<aggregate alias="Delivery" class="msDelivery" local="delivery" foreign="id" cardinality="one" owner="foreign" />
 		<aggregate alias="Payment" class="msPayment" local="payment" foreign="id" cardinality="one" owner="foreign" />
@@ -306,6 +313,7 @@
 	<object class="msOrderProduct" table="ms2_order_products" extends="xPDOSimpleObject">
 		<field key="product_id" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="false" />
 		<field key="order_id" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="false" />
+		<field key="name" dbtype="varchar" precision="255" phptype="string" null="true" />
 		<field key="count" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="true" default="1" />
 		<field key="price" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
 		<field key="weight" dbtype="decimal" precision="13,3" phptype="float" null="true" default="0" />
@@ -357,6 +365,7 @@
 	<object class="msCustomerProfile" table="ms2_customer_profiles" extends="xPDOObject">
 		<field key="id" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="false" index="pk" />
 		<field key="account" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
+		<field key="spent" dbtype="decimal" precision="12,2" phptype="float" null="true" default="0" />
 		<field key="createdon" dbtype="timestamp" phptype="datetime" null="true" default="CURRENT_TIMESTAMP" />
 		<field key="referrer_id" dbtype="int" precision="10" phptype="integer" attributes="unsigned" null="true" default="0" index="index" />
 		<field key="referrer_code" dbtype="varchar" precision="50" phptype="string" null="true" default="" index="index" />
@@ -370,8 +379,11 @@
 		<index alias="referrer_code" name="referrer_code" primary="false" unique="true" type="BTREE" >
 			<column key="referrer_code" length="" collation="A" null="false" />
 		</index>
+		<index alias="spent" name="spent" primary="false" unique="false" type="BTREE" >
+			<column key="spent" length="" collation="A" null="false" />
+		</index>
 
-		<aggregate alias="User" class="modUser" local="internalKey" foreign="id" owner="foreign" cardinality="one" />
+		<aggregate alias="User" class="modUser" local="id" foreign="id" owner="foreign" cardinality="one" />
 	</object>
 
 </model>

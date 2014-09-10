@@ -23,13 +23,18 @@ $tmp = array(
 		,'xtype' => 'combo-boolean'
 		,'area' => 'ms2_category'
 	)
+	,'ms2_category_remember_grid' => array(
+		'value' => true
+		,'xtype' => 'combo-boolean'
+		,'area' => 'ms2_category'
+	)
 	,'ms2_category_id_as_alias' => array(
 		'value' => false
 		,'xtype' => 'combo-boolean'
 		,'area' => 'ms2_category'
 	)
 	,'ms2_category_content_default' => array(
-		'value' => "[[!getPage?\n	&element=`msProducts`\n]]\n\n<div class=\"pagination\">\n	<ul>[[!+page.nav]]</ul>\n</div>"
+		'value' => "[[!pdoPage?\n	&element=`msProducts`\n]]\n\n[[!+page.nav]]"
 		,'xtype' => 'textarea'
 		,'area' => 'ms2_category'
 	)
@@ -95,22 +100,41 @@ $tmp = array(
 		,'xtype' => 'textfield'
 		,'area' => 'ms2_product'
 	)
+	/*
 	,'ms2_price_snippet' => array(
 		'value' => ''
 		,'xtype' => 'textfield'
 		,'area' => 'ms2_product'
 	)
+	*/
 	,'ms2_price_format_no_zeros' => array(
 		'value' => true
 		,'xtype' => 'combo-boolean'
 		,'area' => 'ms2_product'
 	)
+	/*
 	,'ms2_weight_snippet' => array(
 		'value' => ''
 		,'xtype' => 'textfield'
 		,'area' => 'ms2_product'
 	)
+	*/
 	,'ms2_weight_format_no_zeros' => array(
+		'value' => true
+		,'xtype' => 'combo-boolean'
+		,'area' => 'ms2_product'
+	)
+	,'ms2_product_tab_extra' => array(
+		'value' => true
+		,'xtype' => 'combo-boolean'
+		,'area' => 'ms2_product'
+	)
+	,'ms2_product_tab_gallery' => array(
+		'value' => true
+		,'xtype' => 'combo-boolean'
+		,'area' => 'ms2_product'
+	)
+	,'ms2_product_tab_links' => array(
 		'value' => true
 		,'xtype' => 'combo-boolean'
 		,'area' => 'ms2_product'
@@ -125,7 +149,7 @@ $tmp = array(
 
 
 	,'ms2_order_grid_fields' => array(
-		'value' => 'id,customer,num,status,cost,weight,delivery,payment,createdon,updatedon,comment'
+		'value' => 'id,num,customer,status,cost,weight,delivery,payment,createdon,updatedon,comment'
 		,'xtype' => 'textarea'
 		,'area' => 'ms2_order'
 	)

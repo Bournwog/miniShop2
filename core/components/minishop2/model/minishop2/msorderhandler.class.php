@@ -84,7 +84,7 @@ interface msOrderInterface {
 	 *
 	 * @return array $response
 	 */
-	public function getcost();
+	public function getCost();
 }
 
 
@@ -319,7 +319,7 @@ class msOrderHandler implements msOrderInterface {
 
 		$user_id = $this->ms2->getCustomerId();
 		$cart_status = $this->ms2->cart->status();
-		$delivery_cost = $this->getcost(false, true);
+		$delivery_cost = $this->getCost(false, true);
 		$createdon = date('Y-m-d H:i:s');
 		/* @var msOrder $order */
 		$order = $this->modx->newObject('msOrder');
@@ -350,10 +350,17 @@ class msOrderHandler implements msOrderInterface {
 		$cart = $this->ms2->cart->get();
 		$products = array();
 		foreach ($cart as $v) {
+			if ($tmp = $this->modx->getObject('msProduct', $v['id'])) {
+				$name = $tmp->get('pagetitle');
+			}
+			else {
+				$name = '';
+			}
 			/* @var msOrderProduct $product */
 			$product = $this->modx->newObject('msOrderProduct');
 			$product->fromArray(array_merge($v, array(
 				'product_id' => $v['id']
+				,'name' => $name
 				,'cost' => $v['price'] * $v['count']
 			)));
 			$products[] = $product;
@@ -389,6 +396,7 @@ class msOrderHandler implements msOrderInterface {
 			elseif ($payment = $this->modx->getObject('msPayment', array('id' => $order->get('payment'), 'active' => 1))) {
 				$response = $payment->send($order);
 				if ($this->config['json_response']) {
+					@session_write_close();
 					exit(is_array($response) ? $this->modx->toJSON($response) : $response);
 				}
 				else {
@@ -397,11 +405,11 @@ class msOrderHandler implements msOrderInterface {
 						exit();
 					}
 					elseif (!empty($response['data']['msorder'])) {
-						$this->modx->sendRedirect($this->modx->makeUrl($this->modx->resource->id), array('msorder' => $response['data']['msorder']));
+						$this->modx->sendRedirect($this->modx->context->makeUrl($this->modx->resource->id, array('msorder' => $response['data']['msorder'])));
 						exit();
 					}
 					else {
-						$this->modx->sendRedirect($this->modx->makeUrl($this->modx->resource->id));
+						$this->modx->sendRedirect($this->modx->context->makeUrl($this->modx->resource->id));
 						exit();
 					}
 				}
@@ -411,7 +419,7 @@ class msOrderHandler implements msOrderInterface {
 					return $this->success('', array('msorder' => $order->get('id')));
 				}
 				else {
-					$this->modx->sendRedirect($this->modx->makeUrl($this->modx->resource->id), array('msorder' => $response['data']['msorder']));
+					$this->modx->sendRedirect($this->modx->context->makeUrl($this->modx->resource->id, array('msorder' => $response['data']['msorder'])));
 					exit();
 				}
 			}
@@ -434,19 +442,25 @@ class msOrderHandler implements msOrderInterface {
 
 
 	/** @inheritdoc} */
-	public function getcost($with_cart = true, $only_cost = false) {
-		$cost = 0;
+	public function getCost($with_cart = true, $only_cost = false) {
 		$cart = $this->ms2->cart->status();
+		$cost = $with_cart
+			? $cart['total_cost']
+			: 0;
+
 		/* @var msDelivery $delivery */
-		if ($delivery = $this->modx->getObject('msDelivery', $this->order['delivery'])) {
-			$cost = $delivery->getcost($this);
+		if (!empty($this->order['delivery']) && $delivery = $this->modx->getObject('msDelivery', $this->order['delivery'])) {
+			$cost = $delivery->getCost($this, $cost);
 		}
 
-		if ($with_cart) {
-			$cost += $cart['total_cost'];
+		/* @var msPayment $payment */
+		if (!empty($this->order['payment']) && $payment = $this->modx->getObject('msPayment', $this->order['payment'])) {
+			$cost = $payment->getCost($this, $cost);
 		}
 
-		return $only_cost ? $cost : $this->success('', array('cost' => $cost));
+		return $only_cost
+			? $cost
+			: $this->success('', array('cost' => $cost));
 	}
 
 

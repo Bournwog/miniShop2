@@ -3,7 +3,16 @@
 class msDeliveryGetProcessor extends modObjectGetProcessor {
 	public $classKey = 'msDelivery';
 	public $languageTopics = array('minishop2');
-	public $objectType = 'ms2_delivery';
+	public $permission = 'mssetting_view';
+
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
 }
 
 return 'msDeliveryGetProcessor';

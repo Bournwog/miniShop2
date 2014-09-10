@@ -25,6 +25,7 @@ class miniShop2 {
 		$corePath = $this->modx->getOption('minishop2.core_path', $config, $this->modx->getOption('core_path').'components/minishop2/');
 		$assetsPath = $this->modx->getOption('minishop2.assets_path', $config, $this->modx->getOption('assets_path').'components/minishop2/');
 		$assetsUrl = $this->modx->getOption('minishop2.assets_url', $config, $this->modx->getOption('assets_url').'components/minishop2/');
+		$actionUrl = $this->modx->getOption('minishop2.action_url', $config, $assetsUrl.'action.php');
 		$connectorUrl = $assetsUrl.'connector.php';
 
 		$this->config = array_merge(array(
@@ -36,6 +37,7 @@ class miniShop2 {
 			,'customPath' => $corePath.'custom/'
 
 			,'connectorUrl' => $connectorUrl
+			,'actionUrl' => $actionUrl
 
 			,'corePath' => $corePath
 			,'assetsPath' => $assetsPath
@@ -54,9 +56,10 @@ class miniShop2 {
 	/**
 	 * Initializes component into different contexts.
 	 *
-	 * @access public
 	 * @param string $ctx The context to load. Defaults to web.
 	 * @param array $scriptProperties Properties for initialization.
+	 *
+	 * @return bool
 	 */
 	public function initialize($ctx = 'web', $scriptProperties = array()) {
 		$this->config = array_merge($this->config, $scriptProperties);
@@ -79,6 +82,7 @@ class miniShop2 {
 						cssUrl: "'.$this->config['cssUrl'].'web/"
 						,jsUrl: "'.$this->config['jsUrl'].'web/"
 						,imagesUrl: "'.$this->config['imagesUrl'].'web/"
+						,actionUrl: "'.$this->config['actionUrl'].'"
 						,ctx: "'.$this->modx->context->get('key').'"
 						,close_all_message: "'.$this->modx->lexicon('ms2_message_close_all').'"
 						,price_format: '.$this->modx->getOption('ms2_price_format', null, '[2, ".", " "]').'
@@ -108,12 +112,7 @@ class miniShop2 {
 							,getRequired: miniShop2Config.callbacksObjectTemplate()
 						}
 					};');
-					if (file_put_contents($this->config['jsPath'] . 'web/config.js', $config_js)) {
-						$this->modx->regClientStartupScript($this->config['jsUrl'] . 'web/config.js');
-					}
-					else {
-						$this->modx->regClientStartupScript("<script type=\"text/javascript\">\n".$config_js."\n</script>", true);
-					}
+					$this->modx->regClientStartupScript("<script type=\"text/javascript\">\n".$config_js."\n</script>", true);
 
 					if ($js = trim($this->modx->getOption('ms2_frontend_js'))) {
 						if (!empty($js) && preg_match('/\.js/i', $js)) {
@@ -162,13 +161,12 @@ class miniShop2 {
 	 * Method for transform array to placeholders
 	 *
 	 * @var array $array With keys and values
+	 * @var string $prefix Placeholders prefix
+	 *
 	 * @return array $array Two nested arrays With placeholders and values
 	 */
 	public function makePlaceholders(array $array = array(), $prefix = '') {
-		$result = array(
-			'pl' => array()
-			,'vl' => array()
-		);
+		$result = array('pl' => array(), 'vl' => array());
 		foreach ($array as $k => $v) {
 			if (is_array($v)) {
 				$result = array_merge_recursive($result, $this->makePlaceholders($v, $k.'.'));
@@ -186,6 +184,7 @@ class miniShop2 {
 	 * Method loads custom classes from specified directory
 	 *
 	 * @var string $dir Directory for load classes
+	 *
 	 * @return void
 	 */
 	public function loadCustomClasses($dir) {
@@ -294,6 +293,7 @@ class miniShop2 {
 		$order->set('status', $status_id);
 
 		if ($order->save()) {
+			$this->orderLog($order->get('id'), 'status', $status_id);
 			$response = $this->invokeEvent('msOnChangeOrderStatus', array(
 				'order' => $order,
 				'status' => $status_id
@@ -301,8 +301,6 @@ class miniShop2 {
 			if (!$response['success']) {
 				return $response['message'];
 			}
-
-			$this->orderLog($order->get('id'), 'status', $status_id);
 
 			/* @var modContext $context */
 			if ($context = $this->modx->getObject('modContext', array('key' => $order->get('context')))) {
@@ -383,6 +381,7 @@ class miniShop2 {
 	 *
 	 * @param mixed $html Source code for parse
 	 * @param integer $maxIterations
+	 *
 	 * @return mixed $html Parsed html
 	 */
 	public function processTags($html, $maxIterations = 10) {
@@ -466,16 +465,21 @@ class miniShop2 {
 	/**
 	 * Function for formatting price
 	 *
-	 * @param string $price Source price
-	 * @return string $price Formatted price
+	 * @param string $price
+	 *
+	 * @return string $price
 	 */
-	public function formatPrice($price = 0) {
-		$pf = json_decode($this->modx->getOption('ms2_price_format', null, '[2, ".", " "]'), true);
-		$price = number_format($price, $pf[0], $pf[1], $pf[2]);
+	public function formatPrice($price = '0') {
+		$pf = $this->modx->fromJSON($this->modx->getOption('ms2_price_format', null, '[2, ".", " "]'));
+		if (is_array($pf)) {
+			$price = number_format($price, $pf[0], $pf[1], $pf[2]);
+		}
 
 		if ($this->modx->getOption('ms2_price_format_no_zeros', null, true)) {
-			$price = preg_replace('/(0+)$/', '', $price);
-			$price = preg_replace('/[^0-9]$/', '', $price);
+			if (preg_match('/\..*$/', $price, $matches)) {
+				$tmp = rtrim($matches[0], '.0');
+				$price = str_replace($matches[0], $tmp, $price);
+			}
 		}
 
 		return $price;
@@ -485,16 +489,21 @@ class miniShop2 {
 	/**
 	 * Function for formatting weight
 	 *
-	 * @param string $weight Source weight
-	 * @return string $weight Formatted weight
+	 * @param string $weight
+	 *
+	 * @return string
 	 */
-	public function formatWeight($weight = 0) {
+	public function formatWeight($weight = '0') {
 		$wf = json_decode($this->modx->getOption('ms2_weight_format', null, '[3, ".", " "]'), true);
-		$weight = number_format($weight, $wf[0], $wf[1], $wf[2]);
+		if (is_array($wf)) {
+			$weight = number_format($weight, $wf[0], $wf[1], $wf[2]);
+		}
 
 		if ($this->modx->getOption('ms2_weight_format_no_zeros', null, true)) {
-			$weight = preg_replace('/(0+)$/', '', $weight);
-			$weight = preg_replace('/[^0-9]$/', '', $weight);
+			if (preg_match('/\..*$/', $weight, $matches)) {
+				$tmp = rtrim($matches[0], '.0');
+				$weight = str_replace($matches[0], $tmp, $weight);
+			}
 		}
 
 		return $weight;

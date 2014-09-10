@@ -18,11 +18,13 @@ miniShop2.grid.Orders = function(config) {
 		,autoHeight: true
 		,paging: true
 		,remoteSort: true
+		,bodyCssClass: 'grid-with-buttons'
 		,sm: this.sm
+		,cls: 'minishop2-grid'
 		,plugins: this.exp
 		,columns: this.getColumns()
 		,tbar: [{
-				text: '<i class="bicon-list"></i> ' + _('ms2_bulk_actions')
+				text: '<i class="'+ (MODx.modx23 ? 'icon icon-list' : 'bicon-list') + '"></i> ' + _('ms2_bulk_actions')
 				,menu: [
 				/*{
 					text: _('ms2_product_selected_status')
@@ -55,7 +57,7 @@ miniShop2.grid.Orders = function(config) {
 			},{
 				xtype: 'button'
 				,id: 'minishop2-orders-clear'
-				,text: '<i class="bicon-remove-sign"></i>'/* + _('ms2_search_clear')*/
+				,text: '<i class="'+ (MODx.modx23 ? 'icon icon-times' : 'bicon-remove-sign') + '"></i>'/* + _('ms2_search_clear')*/
 				,listeners: {
 					click: {fn: this.clearFilter, scope: this}
 				}
@@ -70,6 +72,7 @@ miniShop2.grid.Orders = function(config) {
 	});
 	miniShop2.grid.Orders.superclass.constructor.call(this,config);
 	this.changed = false;
+	this._makeTemplates();
 };
 Ext.extend(miniShop2.grid.Orders,MODx.grid.Grid,{
 	windows: {}
@@ -109,15 +112,61 @@ Ext.extend(miniShop2.grid.Orders,MODx.grid.Grid,{
 		this.refresh();
 	}
 
+	,_makeTemplates: function() {
+		var userPage = MODx.action ? MODx.action['security/user/update'] : 'security/user/update';
+		this.tplCustomer = new Ext.XTemplate(''
+			+'<tpl for="."><div class="order-title-column {cls}">'
+				+'<h3 class="main-column"><span class="title">' + _('ms2_order') + ' #{num}</span></h3>'
+				+'<tpl if="actions">'
+					+'<ul class="actions">'
+						+'<tpl for="actions">'
+							+'<li><a href="#" class="controlBtn {className}">{text}</a></li>'
+						+'</tpl>'
+					+'</ul>'
+				+'</tpl>'
+			+'</div></tpl>',{
+			compiled: true
+		});
+	}
+
+	,_renderCustomer:function(v,md,rec) {
+		return this.tplCustomer.apply(rec.data);
+	}
+
+	,_renderCost:function(v,md,rec) {
+		return rec.data.type && rec.data.type == 1
+			? '-'+v
+			: v;
+	}
+
+	,onClick: function(e){
+		var t = e.getTarget();
+		var elm = t.className.split(' ')[0];
+		if(elm == 'controlBtn') {
+			var action = t.className.split(' ')[1];
+			this.menu.record = this.getSelectionModel().getSelected().data;
+			switch (action) {
+				case 'update':
+					this.updateOrder(this,e);
+					break;
+				case 'delete':
+					this.removeOrder(this,e);
+					break;
+			}
+		}
+		this.processEvent('click', e);
+	}
+
+
 	,getColumns: function() {
 		var all = {
 			id: {width: 35}
 			,customer: {width: 100, sortable: true, renderer: miniShop2.utils.userLink}
+			,num: {width: 100, sortable: true, renderer: {fn:this._renderCustomer,scope:this}, id: 'main'}
 			,receiver: {width: 100, sortable: true}
 			,createdon: {width: 75, sortable: true, renderer: miniShop2.utils.formatDate}
 			,updatedon: {width: 75, sortable: true, renderer: miniShop2.utils.formatDate}
-			,num: {width: 50, sortable: true}
-			,cost: {width: 75, sortable: true}
+			,cost: {width: 75, sortable: true, renderer: this._renderCost}
 			,cart_cost: {width: 75, sortable: true}
 			,delivery_cost: {width: 75, sortable: true}
 			,weight: {width: 50, sortable: true}
@@ -183,7 +232,7 @@ Ext.extend(miniShop2.grid.Orders,MODx.grid.Grid,{
 	}
 
 	,removeOrder: function(btn,e) {
-		if (!this.menu.record) return false;
+		if (!this.menu.record) return;
 
 		MODx.msg.confirm({
 			title: _('ms2_menu_remove') + ' ' + _('ms2_order') + ' #' + this.menu.record.num
@@ -233,6 +282,7 @@ miniShop2.window.UpdateOrder = function(config) {
 		title: _('ms2_menu_update')
 		,id: this.ident
 		,width: 750
+		,autoHeight: true
 		,labelAlign: 'top'
 		,url: miniShop2.config.connector_url
 		,action: 'mgr/orders/update'
@@ -509,12 +559,12 @@ Ext.extend(miniShop2.grid.Products,MODx.grid.Grid, {
 		var fields = {
 			id: {hidden: true, sortable: true, width: 40}
 			,product_id: {hidden: true, sortable: true, width: 40}
-			,product_pagetitle: {header: _('ms2_product'), width: 100, renderer: miniShop2.utils.productLink}
+			,name: {header: _('ms2_name'), width: 100, renderer: miniShop2.utils.productLink}
 			,product_weight: {header: _('ms2_product_weight'), width: 50}
 			,product_price: {header: _('ms2_product_price'), width: 50}
 			,product_article: {width: 50}
-			,weight: { sortable: true, width: 50}
-			,price: {sortable: true, width: 50}
+			,weight: {sortable: true, width: 50}
+			,price: {sortable: true, header: _('ms2_product_price'), width: 50}
 			,count: {sortable: true, width: 50}
 			,cost: {width: 50}
 			,options: {width: 100}
@@ -648,6 +698,7 @@ miniShop2.window.OrderProduct = function(config) {
 		title: _('ms2_menu_update')
 		,autoHeight: true
 		,width: 600
+		,autoHeight: true
 		,url: miniShop2.config.connector_url
 		,action: config.action || 'mgr/orders/product/update'
 		,fields: [
@@ -662,7 +713,7 @@ miniShop2.window.OrderProduct = function(config) {
 						{xtype: 'numberfield', fieldLabel: _('ms2_product_count'), name: 'count', anchor: '100%', allowNegative: false, allowBlank: false}
 					]}
 					,{columnWidth: .7,layout: 'form',defaults: { msgTarget: 'under' }, border:false, items: [
-						{xtype: 'textfield', fieldLabel: _('ms2_product_pagetitle'), name: 'pagetitle', anchor: '100%', disabled: true }
+						{xtype: 'textfield', fieldLabel: _('ms2_name'), name: 'name', anchor: '100%' }
 					]}
 				]
 			}

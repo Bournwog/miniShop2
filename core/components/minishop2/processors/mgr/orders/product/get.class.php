@@ -3,7 +3,19 @@
 class msOrderProductGetProcessor extends modObjectGetProcessor {
 	public $classKey = 'msOrderProduct';
 	public $languageTopics = array('minishop2:default');
+	public $permission = 'msorder_view';
 
+
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
+
+
+	/** {@inheritDoc} */
 	public function cleanup() {
 		$array = $this->object->toArray('', true);
 		if ($tmp = json_decode($array['options'], true)) {
@@ -19,16 +31,20 @@ class msOrderProductGetProcessor extends modObjectGetProcessor {
 
 		if ($product = $this->object->getOne('Product')) {
 			$array = array_merge($product->toArray(), $array);
+			if (empty($array['name'])) {
+				$array['name'] = $array['pagetitle'];
+			}
 		}
 
 		return $this->success('', $array);
 	}
 
+
+	/** {@inheritDoc} */
 	function my_json_encode($arr) {
 		//convmap since 0x80 char codes so it takes all multibyte codes (above ASCII 127). So such characters are being "hidden" from normal json_encoding
 		array_walk_recursive($arr, function (&$item, $key) { if (is_string($item)) $item = mb_encode_numericentity($item, array (0x80, 0xffff, 0, 0xffff), 'UTF-8'); });
 		return mb_decode_numericentity(json_encode($arr), array (0x80, 0xffff, 0, 0xffff), 'UTF-8');
-
 	}
 
 }

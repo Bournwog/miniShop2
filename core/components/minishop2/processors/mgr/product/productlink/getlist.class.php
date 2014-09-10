@@ -4,27 +4,19 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 	public $classKey = 'msProductLink';
 	public $defaultSortField = 'link';
 	public $defaultSortDirection  = 'ASC';
+	public $permission = '';
 
-	/**
-	 * {@inheritDoc}
-	 * @return boolean
-	 */
+
+	/** {@inheritDoc} */
 	public function initialize() {
-		$this->setDefaultProperties(array(
-			'start' => 0,
-			'limit' => 20,
-			'sort' => $this->defaultSortField,
-			'dir' => $this->defaultSortDirection,
-			'combo' => false,
-			'query' => '',
-		));
-		return true;
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return mixed
-	 */
+
+	/** {@inheritDoc} */
 	public function process() {
 		$beforeQuery = $this->beforeQuery();
 		if ($beforeQuery !== true) {
@@ -36,10 +28,7 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 	}
 
 
-	/**
-	 * Get the data of the query
-	 * @return array
-	 */
+	/** {@inheritDoc} */
 	public function getData() {
 		$data = array();
 		$limit = intval($this->getProperty('limit'));
@@ -69,6 +58,7 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 	}
 
 
+	/** {@inheritDoc} */
 	public function getCount($className, $criteria= null) {
 		$count= 0;
 		$q = $this->modx->newQuery($className, $criteria);
@@ -80,12 +70,8 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 		return $count;
 	}
 
-	/**
-	 * Iterate across the data
-	 *
-	 * @param array $data
-	 * @return array
-	 */
+
+	/** {@inheritDoc} */
 	public function iterate(array $data) {
 		$list = array();
 		$list = $this->beforeIteration($list);
@@ -102,10 +88,8 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 		return $list;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return xPDOQuery
-	 */
+
+	/** {@inheritDoc} */
 	public function prepareQueryBeforeCount(xPDOQuery $c) {
 		if ($master = $this->getProperty('master')) {
 			$c->orCondition(array('master' => $master, 'slave' => $master));
@@ -120,10 +104,8 @@ class msProductLinkGetListProcessor extends modObjectGetListProcessor {
 		return $c;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return array
-	 */
+
+	/** {@inheritDoc} */
 	public function prepareResult(array $array) {
 		return $array;
 	}

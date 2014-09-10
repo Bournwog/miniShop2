@@ -2,7 +2,7 @@ miniShop2.page.CreateCategory = function(config) {
 	config = config || {record:{}};
 	config.record = config.record || {};
 	Ext.applyIf(config,{
-		panelXType: 'minishop2-panel-category'
+		panelXType: 'minishop2-panel-category-create'
 		,mode: "create"
 	});
 	miniShop2.page.CreateCategory.superclass.constructor.call(this,config);
@@ -14,10 +14,11 @@ Ext.extend(miniShop2.page.CreateCategory,MODx.page.CreateResource,{
 
 		if (cfg.canSave == 1) {
 			btns.push({
-				process: 'create'
-				,text: '<i class="bicon-ok"></i> ' + _('ms2_btn_save')
+				process: MODx.modx23 ? 'resource/create' : 'create'
+				,text: '<i class="'+ (MODx.modx23 ? 'icon icon-check' : 'bicon-ok') + '"></i> ' + _('ms2_btn_save')
 				,method: 'remote'
 				,checkDirty: cfg.richtext || MODx.request.activeSave == 1 ? false : true
+				,cls: 'primary-button'
 				,keys: [{
 					key: MODx.config.keymap_save || 's'
 					,ctrl: true
@@ -27,19 +28,12 @@ Ext.extend(miniShop2.page.CreateCategory,MODx.page.CreateResource,{
 		}
 
 		btns.push({
-			text: '<i class="bicon-ban-circle"></i>' + _('ms2_btn_cancel')
+			text: '<i class="'+ (MODx.modx23 ? 'icon icon-ban' : 'bicon-ban-circle') + '"></i> ' + _('ms2_btn_cancel')
 			,handler: this.upPage
 			,scope: this
 			,tooltip: _('ms2_btn_back')
+			,keys: [{key: 38,alt: true, scope: this, fn: this.upPage}]
 		});
-
-		/*
-		 btns.push({
-		 text: '<i class="bicon-question-sign"></i>'
-		 ,handler: this.loadHelpPane
-		 ,tooltip: _('ms2_product_help')
-		 });
-		 */
 
 		return btns;
 	}
@@ -81,11 +75,11 @@ Ext.extend(miniShop2.page.CreateCategory,MODx.page.CreateResource,{
 Ext.reg('minishop2-page-category-create',miniShop2.page.CreateCategory);
 
 
-miniShop2.panel.Category = function(config) {
+miniShop2.panel.CreateCategory = function(config) {
 	config = config || {};
-	miniShop2.panel.Category.superclass.constructor.call(this,config);
+	miniShop2.panel.CreateCategory.superclass.constructor.call(this,config);
 };
-Ext.extend(miniShop2.panel.Category,MODx.panel.Resource,{
+Ext.extend(miniShop2.panel.CreateCategory,MODx.panel.Resource,{
 
 	getFields: function(config) {
 		var it = [];
@@ -177,7 +171,7 @@ Ext.extend(miniShop2.panel.Category,MODx.panel.Resource,{
 				if (e == 'yes') {
 					var nt = t.getValue();
 					var f = Ext.getCmp('modx-page-update-resource');
-					f.config.action = 'reload';
+					f.config.action = MODx.modx23 ? 'resource/reload' : 'reload';
 					MODx.activePage.submitForm({
 						success: {fn:function(r) {
 							var page = MODx.action ? MODx.action[r.result.object.action] : r.result.object.action;
@@ -192,7 +186,8 @@ Ext.extend(miniShop2.panel.Category,MODx.panel.Resource,{
 					t.setValue(this.config.record.template);
 				}
 			},this);
+			return true;
 		}
 	}
 });
-Ext.reg('minishop2-panel-category',miniShop2.panel.Category);
+Ext.reg('minishop2-panel-category-create',miniShop2.panel.CreateCategory);

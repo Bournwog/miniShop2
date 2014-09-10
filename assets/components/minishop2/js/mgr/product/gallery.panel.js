@@ -24,7 +24,7 @@ miniShop2.panel.ProductGallery = function(config) {
 					,id: 'minishop2-product-plupload-panel'
 					,record: config.record
 					,gridHeight: 150
-					,anchor: '100%'
+					,anchor: '50%'
 				},{
 					xtype: 'minishop2-product-images-panel'
 					,id: 'minishop2-product-images-panel'
@@ -163,7 +163,7 @@ miniShop2.view.ProductImages = function(config) {
 
 	Ext.applyIf(config,{
 		url: miniShop2.config.connector_url
-		,fields: ['id','product_id','name','description','url','createdon','createdby','file','thumbnail','filesort','source','menu']
+		,fields: ['id','product_id','name','description','url','createdon','createdby','file','thumbnail','filesort','source','type']
 		,id: 'minishop2-product-images-view'
 		,baseParams: {
 			action: 'mgr/gallery/getlist'
@@ -173,10 +173,14 @@ miniShop2.view.ProductImages = function(config) {
 			,limit: config.pageSize || 10
 		}
 		,loadingText: _('loading')
-		,tpl: this.templates.thumb
 		,enableDD: true
 		,multiSelect: true
-		,listeners: {}
+		,tpl: this.templates.thumb
+		,itemSelector: 'div.modx-browser-thumb-wrap'
+		,listeners: {
+			selectionchange: {fn:this.showDetails, scope:this, buffer:100}
+			,dblclick: config.onSelect || {fn:Ext.emptyFn,scope:this}
+		}
 		,prepareData: this.formatData.createDelegate(this)
 	});
 	miniShop2.view.ProductImages.superclass.constructor.call(this,config);
@@ -244,7 +248,7 @@ Ext.extend(miniShop2.view.ProductImages,MODx.DataView,{
 		if (!data) return false;
 
 		MODx.msg.confirm({
-			text: _('ms2_gallery_image_delete_confirm')
+			text: _('ms2_gallery_file_delete_confirm')
 			,url: this.config.url
 			,params: {
 				action: 'mgr/gallery/remove'
@@ -269,7 +273,7 @@ Ext.extend(miniShop2.view.ProductImages,MODx.DataView,{
 		}
 
 		MODx.msg.confirm({
-			text: _('ms2_gallery_image_delete_multiple_confirm')
+			text: _('ms2_gallery_file_delete_multiple_confirm')
 			,url: this.config.url
 			,params: {
 				action: 'mgr/gallery/remove_multiple'
@@ -372,8 +376,8 @@ Ext.extend(miniShop2.view.ProductImages,MODx.DataView,{
 	,_initTemplates: function() {
 		this.templates.thumb = new Ext.XTemplate(
 			'<tpl for=".">'
-				,'<div class="modx-pb-thumb-wrap" id="ms2-product-image-{id}">'
-					,'<div class="gal-item-thumb">'
+				,'<div class="modx-browser-thumb-wrap modx-pb-thumb-wrap" id="ms2-product-image-{id}">'
+					,'<div class="modx-browser-thumb modx-gal-item-thumb">'
 						,'<img src="{thumbnail}" title="{name}" />'
 					,'</div>'
 					,'<span>{shortName}</span>'
@@ -385,8 +389,14 @@ Ext.extend(miniShop2.view.ProductImages,MODx.DataView,{
 		this.templates.details = new Ext.XTemplate(
 			'<div class="details">'
 				,'<tpl for=".">'
-					,'<div class="modx-gallery-detail-thumb"><a href="{url}" target="_blank"><img src="{url}" alt="{name}" /></a></div>'
-						,'<div class="modx-gallery-details-info">'
+					,'<div class="modx-gallery-detail-thumb">'
+						,'<tpl if="type == \'image\'">'
+							,'<a href="{url}" target="_blank"><img src="{url}" alt="{name}" /></a>'
+						,'</tpl>'
+						,'<tpl if="type != \'image\'">'
+							,'<a href="{url}" target="_blank"><img src="{thumbnail}" alt="{name}" /></a>'
+						,'</tpl>'
+						,'</div><div class="modx-gallery-details-info">'
 						,_('ms2_gallery_filename') + ': <strong>{file}</strong><br/><br/>'
 						,_('ms2_gallery_title') + ': <strong>{name}</strong><br/><br/>'
 						,_('ms2_gallery_createdon') + ': <strong>{createdon}</strong><br/><br/>'
@@ -408,31 +418,35 @@ Ext.extend(miniShop2.view.ProductImages,MODx.DataView,{
 		var ct = this.getSelectionCount();
 		if (ct == 1) {
 			m.add({
-				text: _('ms2_gallery_image_update')
+				text: _('ms2_gallery_file_update')
 				,handler: this.updateImage
 				,scope: this
 			});
-			m.add({
-				text: _('ms2_gallery_image_generate_thumbs')
-				,handler: this.generateThumbs
-				,scope: this
-			});
+			if (data.type == 'image') {
+				m.add({
+					text: _('ms2_gallery_image_generate_thumbs')
+					,handler: this.generateThumbs
+					,scope: this
+				});
+			}
 			m.add('-');
 			m.add({
-				text: _('ms2_gallery_image_delete')
+				text: _('ms2_gallery_file_delete')
 				,handler: this.deleteImage
 				,scope: this
 			});
 			m.show(n,'tl-c?');
 		} else if (ct > 1) {
-			m.add({
-				text: _('ms2_gallery_image_generate_thumbs')
-				,handler: this.generateThumbsMultiple
-				,scope: this
-			});
+			if (data.type == 'image') {
+				m.add({
+					text: _('ms2_gallery_image_generate_thumbs')
+					,handler: this.generateThumbsMultiple
+					,scope: this
+				});
+			}
 			m.add('-');
 			m.add({
-				text: _('ms2_gallery_image_delete_multiple')
+				text: _('ms2_gallery_file_delete_multiple')
 				,handler: this.deleteMultiple
 				,scope: this
 			});
@@ -451,15 +465,14 @@ miniShop2.window.UpdateImage = function(config) {
 	config = config || {};
 	this.ident = config.ident || 'gupdit'+Ext.id();
 	Ext.applyIf(config,{
-		title: config.record.shortName || _('ms2_gallery_image_update')
+		title: config.record.shortName || _('ms2_gallery_file_update')
 		,id: this.ident
 		,closeAction: 'close'
 		,width: 450
-		,height: 350
+		,autoHeight: true
 		,url: miniShop2.config.connector_url
 		,action: 'mgr/gallery/update'
 		,layout: 'anchor'
-		,autoHeight: false
 		,fields: [
 			{xtype: 'hidden',name: 'id',id: this.ident+'-id'}
 			,{xtype: 'textfield',fieldLabel: _('ms2_gallery_filename'),name: 'file',id: this.ident+'-file',anchor: '100%'}
@@ -493,7 +506,7 @@ miniShop2.panel.Plupload = function(config) {
 		id: 'ms2-plupload-panel'
 		,width: '100%'
 		,height: (config.gridHeight || 200) + 50
-		,autoScroll: true
+		,autoScroll: false
 		,border:false
 		,frame:false
 		,cls: ''
@@ -558,6 +571,10 @@ miniShop2.panel.Plupload = function(config) {
 	});
 	miniShop2.panel.Plupload.superclass.constructor.call(this,config);
 
+	var fields = ['id', 'name', 'size', 'status', 'progress'];
+	this.fileRecord = Ext.data.Record.create(fields);
+	this.fileGrid = Ext.getCmp('plupload-files-grid-'+this.record.id);
+
 };
 Ext.extend(miniShop2.panel.Plupload,MODx.Panel, {
 
@@ -619,10 +636,6 @@ Ext.extend(miniShop2.panel.Plupload,MODx.Panel, {
 	,uploader: null
 
 	,_initUploader: function() {
-		var fields = ['id', 'name', 'size', 'status', 'progress'];
-		this.fileRecord = Ext.data.Record.create(fields);
-		this.fileGrid = Ext.getCmp('plupload-files-grid-'+this.record.id);
-
 		var params = {
 			action: 'mgr/gallery/upload'
 			,id: this.record.id
@@ -639,7 +652,7 @@ Ext.extend(miniShop2.panel.Plupload,MODx.Panel, {
 			,container: this.id
 			,drop_element: 'plupload-files-grid-' + this.record.id
 			,multipart: false
-			,max_file_size : miniShop2.config.maxUploadSize || 10485760
+			,max_file_size : miniShop2.config.media_source.maxUploadSize || 10485760
 			,flash_swf_url : miniShop2.config.assets_url + 'js/mgr/misc/plupload/plupload.flash.swf'
 			,filters : [{
 				title : "Image files"
@@ -648,7 +661,7 @@ Ext.extend(miniShop2.panel.Plupload,MODx.Panel, {
 			,resize : {
 				width : miniShop2.config.media_source.maxUploadWidth || 1920
 				,height : miniShop2.config.media_source.maxUploadHeight || 1080
-				,quality : 100
+				//,quality : 100
 			}
 		});
 
@@ -741,13 +754,7 @@ Ext.extend(miniShop2.panel.Plupload,MODx.Panel, {
 	}
 
 	,fireAlert: function() {
-		Ext.MessageBox.show({
-			title: _('ms2_gallery_errors')
-			,msg: this.errors
-			,buttons: Ext.Msg.OK
-			,modal: false
-			,minWidth: 400
-		});
+		MODx.msg.alert(_('ms2_gallery_errors'), this.errors);
 	}
 
 });

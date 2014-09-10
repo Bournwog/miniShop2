@@ -155,7 +155,7 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 		,setup: function() {
 			miniShop2.Cart.cart = '#msCart';
 			miniShop2.Cart.miniCart = '#msMiniCart';
-			miniShop2.Cart.miniCartNotEmptyClass = 'not_empty';
+			miniShop2.Cart.miniCartNotEmptyClass = 'full';
 			miniShop2.Cart.countInput = 'input[name=count]';
 			miniShop2.Cart.totalWeight = '.ms2_total_weight';
 			miniShop2.Cart.totalCount = '.ms2_total_count';
@@ -198,7 +198,7 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 		}
 		,status: function(status) {
 			if (status['total_count'] < 1) {
-				document.location = document.location;
+				location.reload();
 			}
 			else {
 				var $cart = $(miniShop2.Cart.cart);
@@ -209,7 +209,9 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 				$(miniShop2.Cart.totalWeight).text(miniShop2.Utils.formatWeight(status['total_weight']));
 				$(miniShop2.Cart.totalCount).text(status['total_count']);
 				$(miniShop2.Cart.totalCost).text(miniShop2.Utils.formatPrice(status['total_cost']));
-				miniShop2.Order.getcost();
+				if ($(miniShop2.Order.orderCost, miniShop2.Order.order).length) {
+					miniShop2.Order.getcost();
+				}
 			}
 		}
 		,clean: function() {
@@ -274,9 +276,6 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 						var key = $this.attr('name');
 						var value = $this.val();
 						miniShop2.Order.add(key, value);
-						if ($this.is(miniShop2.Order.deliveryInput)) {
-							miniShop2.Order.getRequired(value);
-						}
 					});
 				var $deliveryInputChecked = $(miniShop2.Order.deliveryInput + ':checked', miniShop2.Order.order);
 				$deliveryInputChecked.trigger('change');
@@ -310,6 +309,7 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 								$field.trigger('click');
 							}
 							else {
+								miniShop2.Order.getRequired(value);
 								miniShop2.Order.updatePayments($field.data('payments'));
 								miniShop2.Order.getcost();
 							}
@@ -318,6 +318,9 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 							$field = $(miniShop2.Order.paymentInputUniquePrefix + response.data[key]);
 							if (response.data[key] != old_value) {
 								$field.trigger('click');
+							}
+							else {
+								miniShop2.Order.getcost();
 							}
 							break;
 						//default:
@@ -356,7 +359,7 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 		,clean: function() {
 			var callbacks = miniShop2.Order.callbacks;
 			callbacks.clean.response.success = function(response) {
-				document.location = document.location;
+				location.reload();
 			}
 
 			var data = {};
@@ -393,7 +396,7 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 						: document.location.href + '?msorder=' + response.data['msorder'];
 				}
 				else {
-					document.location = document.location;
+					location.reload();
 				}
 			}
 			callbacks.submit.response.error = function(response) {
@@ -553,6 +556,8 @@ typeof $.fn.jGrowl == 'function' || document.write('<script src="' + miniShop2Co
 
 	$(document).ready(function($) {
 		miniShop2.initialize();
-		$('button[value="cart/change"]').hide();
+		var html = $('html');
+		html.removeClass('no-js');
+		if (!html.hasClass('js')) {html.addClass('js');}
 	});
 })(this, document, jQuery);

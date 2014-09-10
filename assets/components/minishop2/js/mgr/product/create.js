@@ -5,13 +5,6 @@ miniShop2.page.CreateProduct = function(config) {
 		panelXType: 'minishop2-panel-product'
 	});
 	miniShop2.page.CreateProduct.superclass.constructor.call(this,config);
-
-	if (!miniShop2.keymap.product_navigation) {
-		new Ext.KeyMap(Ext.getBody(), [
-			{key: 38,alt: true,fn: this.upPage,scope: this}
-		]);
-		miniShop2.keymap.product_navigation = 1;
-	}
 };
 
 Ext.extend(miniShop2.page.CreateProduct,MODx.page.CreateResource,{
@@ -21,10 +14,11 @@ Ext.extend(miniShop2.page.CreateProduct,MODx.page.CreateResource,{
 
 		if (cfg.canSave == 1) {
 			btns.push({
-				process: 'create'
-				,text: '<i class="bicon-ok"></i> ' + _('ms2_btn_save')
+				process: MODx.modx23 ? 'resource/create' : 'create'
+				,text: '<i class="'+ (MODx.modx23 ? 'icon icon-check' : 'bicon-ok') + '"></i> ' + _('ms2_btn_save')
 				,method: 'remote'
 				,checkDirty: cfg.richtext || MODx.request.activeSave == 1 ? false : true
+				,cls: 'primary-button'
 				,keys: [{
 					key: MODx.config.keymap_save || 's'
 					,ctrl: true
@@ -34,19 +28,12 @@ Ext.extend(miniShop2.page.CreateProduct,MODx.page.CreateResource,{
 		}
 
 		btns.push({
-			text: '<i class="bicon-ban-circle"></i>' + _('ms2_btn_cancel')
+			text: '<i class="'+ (MODx.modx23 ? 'icon icon-ban' : 'bicon-ban-circle') + '"></i> ' + _('ms2_btn_cancel')
 			,handler: this.upPage
 			,scope: this
 			,tooltip: _('ms2_btn_back')
+			,keys: [{key: 38,alt: true, scope: this, fn: this.upPage}]
 		});
-
-		/*
-		 btns.push({
-		 text: '<i class="bicon-question-sign"></i>'
-		 ,handler: this.loadHelpPane
-		 ,tooltip: _('ms2_product_help')
-		 });
-		 */
 
 		return btns;
 	}
@@ -162,8 +149,18 @@ Ext.extend(miniShop2.panel.Product,MODx.panel.Resource,{
 	}
 
 	,getTabSettings: function(config) {
+		var xtype;
+		if (!miniShop2.config.product_tab_extra && !miniShop2.config.product_tab_gallery && !miniShop2.config.product_tab_links) {
+			xtype = 'minishop2-product-settings-simple';
+		}
+		else {
+			xtype = miniShop2.config.vertical_tabs
+				? 'minishop2-product-settings'
+				: 'minishop2-product-settings-horizontal';
+		}
+
 		return [{
-			xtype: miniShop2.config.vertical_tabs ? 'minishop2-product-settings' : 'minishop2-product-settings-horizontal'
+			xtype: xtype
 			,record: config.record
 			,mode: config.mode
 		}];

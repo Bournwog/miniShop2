@@ -10,6 +10,8 @@ $tmp = array(
 			'OnManagerPageBeforeRender',
 			'OnWebPageInit',
 			'OnHandleRequest',
+			'OnLoadWebDocument',
+			'msOnChangeOrderStatus',
 		)
 	)
 );

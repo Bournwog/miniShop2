@@ -3,6 +3,7 @@
 #msCart th, #msCart td {text-align:center; line-height: 30px;}
 #msCart .title {text-align:left;}
 #msCart th.total {text-align:right; padding-right:5px;}
+.js #msCart [type="submit"][value="cart/change"] {display: none;}
 
 #msMiniCart {font-size: .8em;}
 #msMiniCart h5 {margin: 0;}
@@ -29,7 +30,7 @@
 	font-size: 0.9em;
 }
 
-.ms2_product .old_price, #msProduct .old_price {
+.ms2_product .old_price, #msProduct .old_price, #msCart .old_price {
 	color: brown;
 	font-style: italic;
 	text-decoration: line-through;
@@ -48,7 +49,8 @@
 #msOrder .required-star {display: none;}
 #msOrder .required .required-star {display: inline;}
 
-
 .ms2-message-success  {background-color: green !important;}
 .ms2-message-error  {background-color: brown !important;}
 .ms2-message-info  {background-color: black !important;}
+
+.form-group .input-sm {width: 50%;}

@@ -7,7 +7,7 @@ miniShop2.grid.Delivery = function(config) {
 		,renderer : function(v, p, record){return record.data.description != '' && record.data.description != null ? '<div class="x-grid3-row-expander">&#160;</div>' : '&#160;';}
 	});
 	this.dd = function(grid) {
-		new Ext.dd.DropTarget(grid.container, {
+		this.dropTarget = new Ext.dd.DropTarget(grid.container, {
 			ddGroup : 'dd',
 			copy:false,
 			notifyDrop : function(dd, e, data) {
@@ -49,7 +49,7 @@ miniShop2.grid.Delivery = function(config) {
 		,columns: [this.exp
 			,{header: _('ms2_id'),dataIndex: 'id',width: 50}
 			,{header: _('ms2_name'),dataIndex: 'name',width: 100, editor: {xtype: 'textfield', allowBlank: false}}
-			,{header: _('ms2_price'),dataIndex: 'price',width: 50, editor: {xtype: 'numberfield', decimalPrecision: 2, allowBlank: false}}
+			,{header: _('ms2_add_cost'),dataIndex: 'price',width: 50, editor: {xtype: 'textfield'}}
 			,{header: _('ms2_weight_price'),dataIndex: 'weight_price',width: 50, editor: {xtype: 'numberfield', decimalPrecision: 2}}
 			,{header: _('ms2_distance_price'),dataIndex: 'distance_price',width: 50, editor: {xtype: 'numberfield', decimalPrecision: 2}}
 			,{header: _('ms2_logo'),dataIndex: 'logo',width: 75, renderer: this.renderLogo}
@@ -160,7 +160,7 @@ Ext.extend(miniShop2.grid.Delivery,MODx.grid.Grid,{
 		var fields = [];
 		fields.push({xtype: 'hidden',name: 'id', id: 'minishop2-delivery-id-'+type}
 			,{xtype: 'textfield',fieldLabel: _('ms2_name'), name: 'name', allowBlank: false, anchor: '99%', id: 'minishop2-delivery-name-'+type}
-			,{xtype: 'numberfield',fieldLabel: _('ms2_price'), name: 'price', description: _('ms2_price_help') ,allowBlank: false, decimalPrecision: 2, anchor: '50%', id: 'minishop2-delivery-price-'+type}
+			,{xtype: 'textfield',fieldLabel: _('ms2_add_cost'), name: 'price', description: _('ms2_add_cost_help') ,allowBlank: true, anchor: '50%', id: 'minishop2-delivery-price-'+type}
 			,{xtype: 'numberfield',fieldLabel: _('ms2_weight_price'), description: _('ms2_weight_price_help'), name: 'weight_price', decimalPrecision: 2, allowBlank: true, anchor: '50%', id: 'minishop2-delivery-weight_price-'+type}
 			,{xtype: 'numberfield',fieldLabel: _('ms2_distance_price'), description: _('ms2_distance_price_help'), name: 'distance_price', decimalPrecision: 2, allowBlank: true, anchor: '50%', id: 'minishop2-delivery-distance_price-'+type}
 			,{xtype: 'minishop2-combo-browser',fieldLabel: _('ms2_logo'), name: 'logo', anchor: '99%',  id: 'minishop2-delivery-logo-'+type}
@@ -215,6 +215,13 @@ Ext.extend(miniShop2.grid.Delivery,MODx.grid.Grid,{
 			}
 		});
 	}
+
+	,beforeDestroy: function() {
+		if (this.rendered) {
+			this.dropTarget.destroy();
+		}
+		miniShop2.grid.Delivery.superclass.beforeDestroy.call(this);
+	}
 });
 Ext.reg('minishop2-grid-delivery',miniShop2.grid.Delivery);
 
@@ -228,6 +235,7 @@ miniShop2.window.CreateDelivery = function(config) {
 		title: _('ms2_menu_create')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url
@@ -248,6 +256,7 @@ miniShop2.window.UpdateDelivery = function(config) {
 		title: _('ms2_menu_update')
 		,id: this.ident
 		,width: 600
+		,autoHeight: true
 		,labelAlign: 'left'
 		,labelWidth: 180
 		,url: miniShop2.config.connector_url

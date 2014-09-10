@@ -1,17 +1,31 @@
 <?php
 
 class msProductFileUpdateProcessor extends modObjectUpdateProcessor {
+	public $classKey = 'msProductFile';
+	public $ObjectKey = 'msProductFile';
+	public $languageTopics = array('core:default','minishop2:product');
+	public $permission = 'msproductfile_save';
 	/* @var msProductFile $object */
 	public $object;
-	public $classKey = 'msProductFile';
-	public $languageTopics = array('core:default','minishop2:product');
 	protected $old_name = null;
 
 
+	/** {@inheritDoc} */
+	public function initialize() {
+		if (!$this->modx->hasPermission($this->permission)) {
+			return $this->modx->lexicon('access_denied');
+		}
+		return parent::initialize();
+	}
+
+
+	/** {@inheritDoc} */
 	public function beforeSet() {
 		if (!$this->getProperty('id')) {
 			return $this->failure($this->modx->lexicon('ms2_gallery_err_ns'));
 		}
+
+		$this->old_name = $this->object->get('file');
 
 		foreach (array('file', 'name') as $v) {
 			$tmp = trim($this->getProperty($v));
@@ -19,15 +33,20 @@ class msProductFileUpdateProcessor extends modObjectUpdateProcessor {
 				$this->addFieldError($v, $this->modx->lexicon('field_required'));
 			}
 			else {
+				if ($v == 'file') {
+					$tmp2 = explode('.', $this->old_name);
+					$extension = end($tmp2);
+					$tmp = preg_replace('/\..*$/', '', $tmp) . '.' . $extension;
+				}
 				$this->setProperty($v, $tmp);
 			}
 		}
 
-		$this->old_name = $this->object->get('file');
 		return parent::beforeSet();
 	}
 
 
+	/** {@inheritDoc} */
 	public function afterSave() {
 		if ($this->old_name != $this->object->get('file')) {
 			$this->object->rename($this->object->get('file'), $this->old_name);
@@ -45,7 +64,12 @@ class msProductFileUpdateProcessor extends modObjectUpdateProcessor {
 			}
 		}
 
-		return parent::beforeSave();
+		/** @var msProduct $product */
+		if ($product = $this->object->getOne('Product')) {
+			$product->updateProductImage();
+		}
+
+		return parent::afterSave();
 	}
 
 }
